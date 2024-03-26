@@ -1,0 +1,14 @@
+# Ignore all __pycache__ directories recursively
+**/__pycache__/
+
+# Ignore Python virtual environment directories
+venv/
+env/
+.venv/
+.env/
+
+# Ignore IDE-specific directories and files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
