@@ -39,6 +39,8 @@ Note: *fofn* used is expected to be donorID col1 and full path to R1 paired read
 4. Switch to r enviroment and run defineclones.R with *fofn* supplied as argument. 
 
 
+
+
 Read support usage:
 
 NEEDS ADDED
