@@ -37,3 +37,8 @@ Note: *fofn* used is expected to be donorID col1 and full path to R1 paired read
 3. Run iter_personal_repseq.py with *fof* supplies as an argument. It expects to be ran in same root as above and will create ./presto/changeo
 
 4. Switch to r enviroment and run defineclones.R with *fofn* supplied as argument. 
+
+
+Read support usage:
+
+NEEDS ADDED
