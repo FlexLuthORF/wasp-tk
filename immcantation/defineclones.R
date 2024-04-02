@@ -6,7 +6,7 @@ samples <- read.table(samplesFile, header=FALSE)$V1
 samples <- trimws(samples)
 # Iterate over each sample
 for(sampleID in samples) {
-  inputFileName <- paste0("./presto/", sampleID, "/changeo/", sampleID, "_merged-changeo-rename.tsv")
+  inputFileName <- paste0("./presto/", "/changeo/", sampleID, "_merged-changeo-rename.tsv")
 
   # Check if the Change-O file exists
   if (!file.exists(inputFileName)) {

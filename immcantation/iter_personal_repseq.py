@@ -1,6 +1,7 @@
 import argparse
 import subprocess
 import time
+import os
 
 # Set up argument parsing
 parser = argparse.ArgumentParser(description='Process sample IDs.')
@@ -16,10 +17,10 @@ with open(args.sample_ids_file, 'r') as file:
         sample_ids.append(sample_id)
 
 # Path to the script
-script_path = '/home/zmvanw01/git_repos/swrm_scripts/zvw/repseq_personal-igblast.py'
+script_path = 'repseq_personal-igblast.py'
 
 # Maximum number of concurrent jobs
-max_jobs = 12
+max_jobs = 18
 
 # Function to get the current number of running jobs
 def get_running_jobs_count():
@@ -36,6 +37,7 @@ for sample_id in sample_ids:
     command_to_wrap = f"python -u {script_path} {sample_id}"
 
     # Submit the job with --wrap
+    os.makedirs("./logs", exist_ok=True)
     log_file = f"./logs/{sample_id}.log"
     subprocess.run(["sbatch", 
                     "--job-name=repseq", 

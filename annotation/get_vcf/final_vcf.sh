@@ -95,13 +95,13 @@ mkdir -p "${outd}"
 
 bam_file="$1"
 sample=$(basename "$bam_file" .bam | cut -d '_' -f 1)
-reffn="$2"
-num_threads="$3"
-SV_regions_entire="$4"
-SV_regions_1bp="$5"
-changeg="/home/zmvanw01/git_repos/swrm_scripts/zvw/annotation/get_vcf/vcf_processing.py"
-anno_config_file="$6"
-vcfanno="$7"
+reffn="immune_receptor_genomics/current/reference.fasta"
+num_threads="11"
+SV_regions_entire="../KL_SV_regions_entire.bed"
+SV_regions_1bp="../SV_regions_1bp.bed"
+changeg="vcf_processing.py"
+anno_config_file="../config.toml"
+vcfanno="vcfanno"
 
 samtools addreplacerg -r ID:"${sample}" -r SM:"${sample}" \
     -o "${scratch}/$sample/${sample}.editRG.bam" "${bam_file}"

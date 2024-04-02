@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import pandas as pd
-import numpy as np
 import sys
 import shutil  # For copying files
 
@@ -19,15 +18,32 @@ def process_files(input_csv, original_output_csv, modified_output_csv):
 
     # Iterate over each row in the input DataFrame
     for _, input_row in input_df.iterrows():
-        # Check for NA in 'allele_sequence_start' or 'allele_sequence_end' before proceeding
-        if pd.notna(input_row['allele_sequence_start']) and pd.notna(input_row['allele_sequence_end']):
+        # Define the start and end column names based on the 'gene' column value
+        if any(substring in input_row['gene'] for substring in ['IGKV', 'IGLV', 'IGHV']):
+            start_col, end_col = 'V-REGION_start', 'V-REGION_end'
+        elif any(substring in input_row['gene'] for substring in ['IGKJ', 'IGLJ', 'IGHJ']):
+            start_col, end_col = 'J-REGION_start', 'J-REGION_end'
+        elif 'IGHD' in input_row['gene']:
+            start_col, end_col = 'D-REGION_start', 'D-REGION_end'
+        elif any(substring in input_row['gene'] for substring in ['IGKC', 'IGLC']):
+            start_col, end_col = 'allele_sequence_start', 'allele_sequence_end'
+        else:
+            # Skip this row if none of the conditions are met
+            continue
+
+        # Check for NA in the determined start or end columns before proceeding
+        if pd.notna(input_row[start_col]) and pd.notna(input_row[end_col]):
             # Match based on 'contig' and 'gene'
             matched_rows = output_df[(output_df['contig'] == input_row['contig']) & (output_df['gene'] == input_row['gene'])]
             
-            # Append 'allele_sequence_start' and 'allele_sequence_end' to the matched rows in the output DataFrame
+            # Append the determined start and end values to the matched rows in the output DataFrame
             for idx in matched_rows.index:
-                output_df.at[idx, 'allele_sequence_start'] = input_row['allele_sequence_start']
-                output_df.at[idx, 'allele_sequence_end'] = input_row['allele_sequence_end']
+                output_df.at[idx, 'REGION_start'] = input_row[start_col]
+                output_df.at[idx, 'REGION_end'] = input_row[end_col]
+
+    # Replace all commas in the 'notes' column with semicolons
+    if 'notes' in output_df.columns:
+        output_df['notes'] = output_df['notes'].str.replace(',', ';', regex=False)
 
     # Save the modified DataFrame back to the new output CSV
     output_df.to_csv(modified_output_csv, index=False)

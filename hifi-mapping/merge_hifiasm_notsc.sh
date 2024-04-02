@@ -2,8 +2,8 @@
 set -e -x
 
 #reffn=/home/egenge01/anaconda3/envs/IGv2/lib/python2.7/site-packages/IGenotyper-1.1-py2.7.egg/IGenotyper/data/reference.fasta
-reffn=/home/egenge01/projects/IGL_ref_mod/files_for_VDJbase/putting_together/reference_for_VDJbase/reference.fasta
-dir=/home/egenge01/projects/CW50/run_hifiasm
+reffn=../../immune_receptor_genomics/current/reference.fasta
+dir=./run_hifiasm
 #cat $PWD/138_samples.txt | while read sample
 
 do
@@ -45,10 +45,11 @@ do
     #        source activate seqkit-env
     #        seqkit rmdup --by-seq ${dir}/${sample}/merged_bam_notsc/merged_all_reads.fasta \
     #        -o ${dir}/${sample}/merged_bam_notsc/merged_all_reads.rmdup.fasta"
-    count=`squeue | grep egenge01 | wc -l`
-    while [ ${count} -gt 30 ]
+    user=$(whoami)
+    count=`squeue | grep $user | wc -l`
+    while [ ${count} -gt 15 ]
     do
 	sleep 1s
-	count=`squeue | grep egenge01 | wc -l`
+	count=`squeue | grep $user | wc -l`
     done
 done

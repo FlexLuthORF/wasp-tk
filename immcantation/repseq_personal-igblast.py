@@ -7,17 +7,18 @@ import glob
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('sampleID', type=str, help='Sample ID')
 args = parser.parse_args()
-prestodir = "/home/watsonlab/repSeq/CW50_NS_pool2/presto"
+prestodir = "."
 sampleID = args.sampleID
-changeo_folder = f"{prestodir}/{sampleID}/changeo"
-sample_seq_file = f"{prestodir}/{sampleID}/S5-final_total_collapse-unique_atleast-2_reheader.fasta"
+os.makedirs(f"{prestodir}/changeo/", exist_ok=True)
+changeo_folder = f"{prestodir}/changeo/{sampleID}"
+sample_seq_file = f"{prestodir}/{sampleID}_merged/S5-final_total_collapse-unique_atleast-2_reheader.fasta"
 
 for chain in ('IGK','IGL'):
     igblast_output = os.path.join(changeo_folder, f"igblast_output_{chain}.fmt7")
     if not os.path.exists(igblast_output):
-        database_dir = f'{prestodir}/{sampleID}/alleles/personal-ref/{chain}/database'
-        fasta_dir = f'{prestodir}/{sampleID}/alleles/personal-ref/{chain}/fasta'
-        igdata_path = f'{prestodir}/{sampleID}/alleles/personal-ref/{chain}'
+        database_dir = f'{prestodir}/{sampleID}_merged/alleles/personal-ref/{chain}/database'
+        fasta_dir = f'{prestodir}/{sampleID}_merged/alleles/personal-ref/{chain}/fasta'
+        igdata_path = f'{prestodir}/{sampleID}_merged/alleles/personal-ref/{chain}'
         os.makedirs(igdata_path, exist_ok=True)
         os.makedirs(database_dir, exist_ok=True)
         os.makedirs(fasta_dir, exist_ok=True)
@@ -30,7 +31,8 @@ for chain in ('IGK','IGL'):
             subprocess.run(["cp", file, database_dir])
 
         # Run fasta-from-annotations.py script
-        subprocess.run(["python", "/home/zmvanw01/git_repos/swrm_scripts/zvw/fasta-from-annotations.py",
+            #ADJUST FOR NEXTFLOW
+        subprocess.run(["python", "asta-from-annotations.py",
                         f"/home/egenge01/projects/CW50/{chain}_alleles/{sampleID}/annotations.csv", 
                         fasta_dir])
         

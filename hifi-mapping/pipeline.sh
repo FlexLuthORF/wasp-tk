@@ -108,10 +108,10 @@ do
 	fi
 	if  [ ! -s ${outdir}/break_at_soft_clip/${iter}/${i}_hifi_asm_to_ref.sorted.bam ]
 	then
-	    python /home/egenge01/bioinformatics/bioinformatics-common/python/extract_soft_clip_seq.py \
+	    python extract_soft_clip_seq.py \
 		${bam} > ${outdir}/break_at_soft_clip/${iter}/${i}_hifi_asm.fasta
 	    samtools faidx ${outdir}/break_at_soft_clip/${iter}/${i}_hifi_asm.fasta
-	    align_with_minimap2 \
+	    align_with_minimap2 \>
 		${outdir}/break_at_soft_clip/${iter}/${i}_hifi_asm.fasta \
 		${outdir}/break_at_soft_clip/${iter}/${i}_hifi_asm_to_ref \
 		${reffn} \
