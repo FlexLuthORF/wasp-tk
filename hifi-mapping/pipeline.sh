@@ -35,7 +35,7 @@ function align_with_minimap2_asm20 {
     rm -f ${prefix}.bam
 }
 
-reffn=../../immune_receptor_genomics/current/reference.fasta
+reffn=/home/zmvanw01/git_repos/immune_receptor_genomics/current/reference.fasta
 
 if [ ! -s ${outdir}/reads.fasta.fai ]
 then
@@ -45,25 +45,33 @@ fi
 
 if [ ! -s ${outdir}/hifiasm/asm.bp.hap2.p_ctg.fasta.fai ]
 then
-    mkdir -p ${outdir}/hifiasm
-    hifiasm \
-	-o ${outdir}/hifiasm/asm \
-	-t ${threads} \
-	${outdir}/reads.fasta
+    
+
+    if [ ! -f ${outdir}/hifiasm/asm.bp.hap2.p_ctg.gfa ]
+    then
+		mkdir -p ${outdir}/hifiasm
+        hifiasm \
+        -o ${outdir}/hifiasm/asm \
+        -t ${threads} \
+        ${outdir}/reads.fasta
+    fi
+
     for i in p #r
     do
-	gfatools \
-	    gfa2fa \
-	    ${outdir}/hifiasm/asm.bp.${i}_utg.gfa > \
-	    ${outdir}/hifiasm/asm.bp.${i}_utg.fasta
+        gfatools \
+            gfa2fa \
+            ${outdir}/hifiasm/asm.bp.${i}_utg.gfa > \
+            ${outdir}/hifiasm/asm.bp.${i}_utg.fasta
     done
+
     for i in 1 2
     do
-	gfatools \
-	    gfa2fa \
-	    ${outdir}/hifiasm/asm.bp.hap${i}.p_ctg.gfa > \
-	    ${outdir}/hifiasm/asm.bp.hap${i}.p_ctg.fasta
-	samtools faidx ${outdir}/hifiasm/asm.bp.hap${i}.p_ctg.fasta
+        gfatools \
+            gfa2fa \
+            ${outdir}/hifiasm/asm.bp.hap${i}.p_ctg.gfa > \
+            ${outdir}/hifiasm/asm.bp.hap${i}.p_ctg.fasta
+
+        samtools faidx ${outdir}/hifiasm/asm.bp.hap${i}.p_ctg.fasta
     done
 fi
 
@@ -108,10 +116,10 @@ do
 	fi
 	if  [ ! -s ${outdir}/break_at_soft_clip/${iter}/${i}_hifi_asm_to_ref.sorted.bam ]
 	then
-	    python extract_soft_clip_seq.py \
+	    python /home/zmvanw01/git_repos/wasp/hifi-mapping/extract_soft_clip_seq.py \
 		${bam} > ${outdir}/break_at_soft_clip/${iter}/${i}_hifi_asm.fasta
 	    samtools faidx ${outdir}/break_at_soft_clip/${iter}/${i}_hifi_asm.fasta
-	    align_with_minimap2 \>
+	    align_with_minimap2 \
 		${outdir}/break_at_soft_clip/${iter}/${i}_hifi_asm.fasta \
 		${outdir}/break_at_soft_clip/${iter}/${i}_hifi_asm_to_ref \
 		${reffn} \

@@ -32,7 +32,7 @@ for chain in ('IGK','IGL'):
 
         # Run fasta-from-annotations.py script
             #ADJUST FOR NEXTFLOW
-        subprocess.run(["python", "asta-from-annotations.py",
+        subprocess.run(["python", "fasta-from-annotations.py",
                         f"/home/egenge01/projects/CW50/{chain}_alleles/{sampleID}/annotations.csv", 
                         fasta_dir])
         
