@@ -61,9 +61,9 @@ function run_append_pos {
 #        ighc_import_out="${base_outd}/ighc/$(basename "${ighc_import}")"
 
         # Call the Python script with input, original output, and modified output paths
-        python append_pos_import_genes3.py "${chr2_gene}" "${chr2_import}" "${chr2_import_out}"
-        python append_pos_import_genes3.py "${chr22_gene}" "${chr22_import}" "${chr22_import_out}"
-        python append_pos_import_genes3.py "${igh_gene}" "${igh_import}" "${igh_import_out}"
+        python append_pos_import_genes.py "${chr2_gene}" "${chr2_import}" "${chr2_import_out}"
+        python append_pos_import_genes.py "${chr22_gene}" "${chr22_import}" "${chr22_import_out}"
+        python append_pos_import_genes.py "${igh_gene}" "${igh_import}" "${igh_import_out}"
 ##      python append_pos_import_genes.py "${ighc_gene}" "${ighc_import}" "${ighc_import_out}"
 #        python append_pos_import_genes_ighc.py "${ighc_gene}" "${ighc_import}" "${ighc_import_out}"
     done < extended_samples_paths.fofn

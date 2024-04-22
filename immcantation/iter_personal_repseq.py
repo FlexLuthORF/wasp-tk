@@ -17,6 +17,7 @@ with open(args.sample_ids_file, 'r') as file:
         sample_ids.append(sample_id)
 
 # Path to the script
+        #NEEDS EDIT
 script_path = 'repseq_personal-igblast.py'
 
 # Maximum number of concurrent jobs
