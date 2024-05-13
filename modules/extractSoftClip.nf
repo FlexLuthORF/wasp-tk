@@ -1,7 +1,7 @@
 // modules/extractSoftClip.nf
 
 process extractSoftClip {
-    container 'hifi_container.sif'
+    //container 'hifi_container.sif'
     publishDir "${params.outdir}/${sampleId}/break_at_soft_clip", mode: 'copy'
 
     input:

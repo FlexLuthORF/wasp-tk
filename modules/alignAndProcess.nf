@@ -2,7 +2,7 @@
 
 process alignAndProcess {
     publishDir "${params.outdir}/${sampleId}/alg_asm20_to_ref_with_secondarySeq", mode: 'copy'
-    container 'hifi_container.sif'
+    //container 'hifi_container.sif'
     
     input:
     tuple val(sampleId), path(merged_reads)

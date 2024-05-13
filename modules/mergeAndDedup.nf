@@ -2,7 +2,7 @@
 
 process mergeAndDedup {
     publishDir "${params.outdir}/${sampleId}/merged_bam", mode: 'copy'
-    container 'hifi_container.sif'
+    //container 'hifi_container.sif'
     
     input:
     tuple val(sampleId), path(aligned_contigs)

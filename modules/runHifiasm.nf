@@ -2,14 +2,14 @@
 
 process runHifiasm {
     publishDir "${params.outdir}/${sampleId}/hifiasm", mode: 'copy'
-    container 'hifi_container.sif'
-    
+    //container 'hifi_container.sif'
+
     input:
-    tuple val(sampleId), path(reads_fasta), path(reads_fasta_fai)
+    tuple val(sampleId), path(reads_fasta)
 
     output:
-    tuple val(sampleId), path("asm.bp.hap*.p_ctg.fasta"), emit: hap_contigs
-    tuple val(sampleId), path("asm.bp.hap*.p_ctg.fasta.fai"), emit: hap_contigs_fai
+    tuple val(sampleId), path("asm.bp.hap1.p_ctg.fasta"), path("asm.bp.hap1.p_ctg.fasta.fai"), emit: hap_contigs_hap1
+    tuple val(sampleId), path("asm.bp.hap2.p_ctg.fasta"), path("asm.bp.hap2.p_ctg.fasta.fai"), emit: hap_contigs_hap2
 
     script:
     """

@@ -12,3 +12,6 @@ env/
 .vscode/
 *.sublime-project
 *.sublime-workspace
+
+/container/
+/data/

@@ -9,7 +9,7 @@ fetch_reference_files() {
     git clone git@github.com:Watson-IG/immune_receptor_genomics.git
 
     echo "Copying the most recent data from 'current'..."
-    cp -r immune_receptor_genomics/current ./data
+    cp -rL immune_receptor_genomics/current ./data
 
     echo "Cleaning up cloned repository..."
     rm -rf immune_receptor_genomics
