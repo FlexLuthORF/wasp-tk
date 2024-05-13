@@ -95,7 +95,7 @@ mkdir -p "${outd}"
 
 
 sample="$1"
-bam_file="/$PWD/run_hifiasm/$sample/merged_bam/alg_asm20_notsc_to_ref/$sample.sorted.bam"
+bam_file="/$PWD/run_hifiasm/$sample/merged_bam/alg_asm20_to_ref_with_secondarySeq/$sample.sorted.bam"
 reffn="/home/zmvanw01/git_repos/immune_receptor_genomics/231229/reference.fasta"
 num_threads="11"
 SV_regions_entire="/home/zmvanw01/git_repos/wasp/annotation/KL_SV_regions_entire.bed"

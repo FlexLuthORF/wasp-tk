@@ -2,6 +2,25 @@ import os
 import argparse
 import concurrent.futures
 import subprocess
+import pysam
+
+def uniqueify_bam_read_names(input_bam, output_bam):
+    # Open the input BAM file for reading
+    with pysam.AlignmentFile(input_bam, "rb") as infile:
+        # Open a new BAM file for writing with the same header as the input
+        with pysam.AlignmentFile(output_bam, "wb", header=infile.header) as outfile:
+            # Iterate over each read in the input BAM file
+            for i, read in enumerate(infile):
+                # Modify the read name to ensure uniqueness
+                new_read_name = f"{read.query_name}_{i}"
+                read.query_name = new_read_name
+                
+                # Write the modified read to the output BAM file
+                outfile.write(read)
+    
+    # Index the output BAM file using samtools
+    subprocess.run(["samtools", "index", output_bam])
+    return output_bam
 
 def process_sample(sample_id, bam_path):
     loci_options = [
@@ -46,5 +65,5 @@ if __name__ == "__main__":
     parser.add_argument('sample_id', help='sample ID')
     parser.add_argument('bam_path', help='path to the BAM file')
     args = parser.parse_args()
-
+    unique_bam=
     main(args.sample_id, args.bam_path)
