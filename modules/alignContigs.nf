@@ -13,6 +13,15 @@ process alignContigs {
 
     script:
     """
+    
+    echo "Current working directory:"
+    pwd
+    echo "Effective user ID and group ID:"
+    id
+    echo "Reference file path: ${params.reffn}"
+    ls -l ${params.reffn}
+
+    
     for i in 1 2; do
         minimap2 -x asm20 -t ${params.cpusPerNode} -L -a ${params.reffn} asm.bp.hap\${i}.p_ctg.fasta > asm.bp.hap\${i}.p_ctg_to_ref.sam
         samtools view -Sbh asm.bp.hap\${i}.p_ctg_to_ref.sam > asm.bp.hap\${i}.p_ctg_to_ref.bam

@@ -14,7 +14,7 @@ process extractSoftClip {
     script:
     """
     for i in 1 2; do
-        extract_soft_clip_seq.py asm.bp.hap\${i}.p_ctg_to_ref.sorted.bam > \${i}_hifi_asm.fasta
+        python /usr/local/bin/extract_soft_clip_seq.py asm.bp.hap\${i}.p_ctg_to_ref.sorted.bam > \${i}_hifi_asm.fasta
         samtools faidx \${i}_hifi_asm.fasta
         
         minimap2 -t ${params.cpusPerNode} -L -a ${params.reffn} \${i}_hifi_asm.fasta > \${i}_hifi_asm_to_ref.sam

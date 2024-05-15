@@ -12,6 +12,13 @@ process extractReads {
 
     script:
     """
+    echo "Current working directory:"
+    pwd
+    echo "Effective user ID and group ID:"
+    id
+    echo "Reference file path: ${params.reffn}"
+    ls -l ${params.reffn}
+
     samtools view ${ccsPath} | awk '{ print \">\"\$1\"\\n\"\$10 }' > ${sampleId}.fasta
     samtools faidx ${sampleId}.fasta
     """
