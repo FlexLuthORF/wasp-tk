@@ -4,6 +4,7 @@ set -e -x
 outdir=$1
 ccs=$2
 threads=$3
+sample=$4
 
 function align_with_minimap2 {
     fasta=$1
@@ -49,7 +50,7 @@ function merge_and_rmdup {
     sample=$1
     dir=$PWD/run_hifiasm
     mkdir ${dir}/${sample}/merged_bam
-    samtools merge -f ${dir}/${sample}/merged_bam/merged.bam ${dir}/${sample}/break_at_soft_clip/2/1_asm20_hifi_asm_to_ref.sorted.bam ${dir}/${sample}/break_at_soft_clip/2/2_asm20_hifi_asm_to_ref.sorted.bam
+    samtools merge -f ${dir}/${sample}/merged_bam/merged.bam ${dir}/${sample}/break_at_soft_clip/1_asm20_hifi_asm_to_ref.sorted.bam ${dir}/${sample}/break_at_soft_clip/2_asm20_hifi_asm_to_ref.sorted.bam
     samtools sort -@ 12 ${dir}/${sample}/merged_bam/merged.bam -o ${dir}/${sample}/merged_bam/merged.sorted.bam
     samtools index ${dir}/${sample}/merged_bam/merged.sorted.bam
     samtools fasta --reference ${reffn} ${dir}/${sample}/merged_bam/merged.sorted.bam > ${dir}/${sample}/merged_bam/merged_all_reads.fasta

@@ -65,5 +65,5 @@ if __name__ == "__main__":
     parser.add_argument('sample_id', help='sample ID')
     parser.add_argument('bam_path', help='path to the BAM file')
     args = parser.parse_args()
-    unique_bam=
+    unique_bam = uniqueify_bam_read_names(args.bam_path)
     main(args.sample_id, args.bam_path)
