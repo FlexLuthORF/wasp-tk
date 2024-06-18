@@ -4,7 +4,7 @@ set -e -x
 
 user=$(whoami)
 
-input_file=$(ls *fofn* | head -n 1)
+input_file=$1
 
 while read -r sample; do
     bam_file="/$PWD/run_hifiasm/$sample/merged_bam/alg_asm20_to_ref_with_secondarySeq/$sample.sorted.bam"

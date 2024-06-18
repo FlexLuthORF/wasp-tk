@@ -3,6 +3,7 @@ set -e -x
 
 user=$(whoami)
 input_file=$1
+threads=$2
 cat $input_file | while read sample ccs
 do
     outdir=$PWD/run_hifiasm/${sample}
