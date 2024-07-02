@@ -1,8 +1,9 @@
 #!/bin/bash
 set -e -x
 
-reffn=/home/egenge01/projects/IGL_ref_mod/reference_ready/modified_reference_renamed.fasta
-IG_loci=/home/egenge01/projects/12_sample_test/IG_loci.bed
+reffn=$2
+IG_loci=$3
+threads=$4
 #masked_ref=/home/egenge01/projects/12_sample_test/reference_IGloci_masked.fasta
 scratch=$PWD
 mask_ref=${scratch}/ref_IG_masked.fasta
@@ -15,7 +16,7 @@ samtools faidx ${scratch}/ref_IG_masked.fasta
 }
 
 function run_map_ccs_to_pers {
-    cat $fofn | while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_import igh_gene igh_import ighc_gene ighc_import ccs_bam
+    cat $fofn | while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_import igh_gene igh_import ighc_gene ighc_import ccs_bam trb_gene trb_import trg_gene trg_import trd_gene trd_import tra_gene tra_import
     do
     echo ccs bam is ${ccs_bam}
 	mkdir -p ${scratch}/read_support/${sample}
@@ -33,17 +34,17 @@ function run_map_ccs_to_pers {
 	    > ${outd}/ccs_to_pers/pers_ref.fasta
 	samtools faidx ${outd}/ccs_to_pers/pers_ref.fasta
 	#make not gpu one day
-	sbatch --time=88:00:00 -p gpu -o ${outd}/ccs_to_pers/job_map_to_pers.txt --wrap="/home/egenge01/minimap2/minimap2 -ax map-hifi --secondary=no -t 10 -L ${outd}/ccs_to_pers/pers_ref.fasta ${outd}/ccs_to_pers/reads.fasta > ${outd}/ccs_to_pers/output.sam;
+	minimap2 -ax map-hifi --secondary=no -t ${threads} -L ${outd}/ccs_to_pers/pers_ref.fasta ${outd}/ccs_to_pers/reads.fasta > ${outd}/ccs_to_pers/output.sam;
  samtools view -Sbh ${outd}/ccs_to_pers/output.sam > ${outd}/ccs_to_pers/output.bam;
- samtools sort -@ 10 ${outd}/ccs_to_pers/output.bam -o ${outd}/ccs_to_pers/output.sorted.bam;
+ samtools sort -@ ${threads} ${outd}/ccs_to_pers/output.bam -o ${outd}/ccs_to_pers/output.sorted.bam;
  samtools index ${outd}/ccs_to_pers/output.sorted.bam;
  wait
-  rm -f ${outd}/ccs_to_pers/output.sam"
+  rm -f ${outd}/ccs_to_pers/output.sam
     done
 }
 
 function run_append_pos {
-    while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_import igh_gene igh_import ighc_gene ighc_import ccs_bam
+    while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_import igh_gene igh_import ighc_gene ighc_import ccs_bam trb_gene trb_import trg_gene trg_import trd_gene trd_import tra_gene tra_import
     do
         # Base directory for imported genes
         base_outd="${scratch}/read_support/${sample}/imported_genes"
@@ -62,16 +63,21 @@ function run_append_pos {
         ighc_import_out="${base_outd}/ighc/$(basename "${ighc_import}")"
 
         # Call the Python script with input, original output, and modified output paths
-        python /home/zmvanw01/git_repos/wasp/annotation/read-support/append_pos_import_genes.py "${chr2_gene}" "${chr2_import}" "${chr2_import_out}"
-        python /home/zmvanw01/git_repos/wasp/annotation/read-support/append_pos_import_genes.py "${chr22_gene}" "${chr22_import}" "${chr22_import_out}"
-        python /home/zmvanw01/git_repos/wasp/annotation/read-support/append_pos_import_genes.py "${igh_gene}" "${igh_import}" "${igh_import_out}"
-        python /home/egenge01/projects/12_sample_test/ighc_append_pos.py "${ighc_gene}" "${ighc_import}" "${ighc_import_out}"
+        python append_pos_import_genes.py "${chr2_gene}" "${chr2_import}" "${chr2_import_out}"
+        python append_pos_import_genes.py "${chr22_gene}" "${chr22_import}" "${chr22_import_out}"
+        python append_pos_import_genes.py "${igh_gene}" "${igh_import}" "${igh_import_out}"
+        python append_pos_import_genes.py "${trb_gene}" "${trb_import}" "${trb_import_out}"
+        python append_pos_import_genes.py "${trg_gene}" "${trg_import}" "${trg_import_out}"
+        python append_pos_import_genes.py "${tra_gene}" "${tra_import}" "${tra_import_out}"
+        python append_pos_import_genes.py "${trd_gene}" "${trd_import}" "${trd_import_out}"
+
+        python ighc_append_pos.py "${ighc_gene}" "${ighc_import}" "${ighc_import_out}"
 #        python append_pos_import_genes_ighc.py "${ighc_gene}" "${ighc_import}" "${ighc_import_out}"
     done < $fofn
 }
 
 function get_read_support_vdj3 {
-    while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_import igh_gene igh_import ighc_gene ighc_import ccs_bam
+    while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_import igh_gene igh_import ighc_gene ighc_import ccs_bam trb_gene trb_import trg_gene trg_import trd_gene trd_import tra_gene tra_import
     do
         base_outd="${scratch}/read_support/${sample}/imported_genes"
         bam_file="${scratch}/read_support/${sample}/ccs_to_pers/output.sorted.bam" # ccs reads to personalized reference
@@ -81,7 +87,7 @@ function get_read_support_vdj3 {
             samtools index "$bam_file"
         fi
 
-        for gene_type in "chr2" "chr22" "igh" #"ighc"
+        for gene_type in "chr2" "chr22" "igh" "trb" "trg" "tra" "trd" #"ighc"
         do
             import_out="${base_outd}/${gene_type}/${sample}_make_gene_file_imported.csv"
 
@@ -152,7 +158,7 @@ END {
     avg_reads_per_position = (total_positions > 0) ? total_reads / total_positions : 0;
     percent_accuracy = (matched_positions / total_positions) * 100;
     print total_positions, avg_reads_per_position, mismatched_positions, matched_positions, mismatch_list, match_list, percent_accuracy, positions_with_10x;}' OFS=',' >> "${tmp_file}_awk_out"
-		    python /home/zmvanw01/git_repos/wasp/annotation/read-support/match_subsequences.py "$tmp_bam" "$contig" "$start" "$end" "$gene" "$import_out" > "${tmp_file}_py_out"
+		    python match_subsequences.py "$tmp_bam" "$contig" "$start" "$end" "$gene" "$import_out" > "${tmp_file}_py_out"
 		    wait
 		    paste -d ',' "${tmp_file}_awk_out" "${tmp_file}_py_out" >> "$tmp_file"
 		    rm "${tmp_file}_awk_out" "${tmp_file}_py_out"
@@ -188,7 +194,7 @@ END {
 
 
 function get_read_support_ighc {
-cat $fofn | while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_import igh_gene igh_import ighc_gene ighc_import ccs_bam
+cat $fofn | while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_import igh_gene igh_import ighc_gene ighc_import ccs_bam trb_gene trb_import trg_gene trg_import trd_gene trd_import tra_gene tra_import
     do
         base_outd="${scratch}/read_support/${sample}/imported_genes"
         bam_file="${scratch}/read_support/${sample}/ccs_to_pers/output.sorted.bam" # ccs reads to personalized reference
@@ -315,7 +321,7 @@ cat $fofn | while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_imp
                         percent_accuracy = (matched_positions / total_positions) * 100;
                         print total_positions, total_reads, mismatched_positions, matched_positions, mismatch_list, match_list, mismatched_positions_coverage_less_than_10, mismatched_positions_coverage_10_or_greater, matched_positions_coverage_less_than_10, matched_positions_coverage_10_or_greater, percent_accuracy;
                     }' OFS=',' >> "${tmp_file}_awk_out"
-		    python /home/zmvanw01/git_repos/wasp/annotation/read-support/ighc_match3.py "$tmp_bam" "$contig" "$gene" "$modified_import_out" > "${tmp_file}_py_out"
+		    python ighc_match3.py "$tmp_bam" "$contig" "$gene" "$modified_import_out" > "${tmp_file}_py_out"
 		    wait
 		    paste -d ',' "${tmp_file}_awk_out" "${tmp_file}_py_out" >> "$tmp_file"
 		    rm "${tmp_file}_awk_out" "${tmp_file}_py_out"
@@ -349,8 +355,8 @@ done
 }
 
 fofn=$1
-#run_make_ref_masked
-#run_map_ccs_to_pers
+run_make_ref_masked
+run_map_ccs_to_pers
 run_append_pos
-#get_read_support_vdj3
+get_read_support_vdj3
 get_read_support_ighc
