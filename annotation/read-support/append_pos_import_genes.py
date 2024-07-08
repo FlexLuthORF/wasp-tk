@@ -19,13 +19,13 @@ def process_files(input_csv, original_output_csv, modified_output_csv):
     # Iterate over each row in the input DataFrame
     for _, input_row in input_df.iterrows():
         # Define the start and end column names based on the 'gene' column value
-        if any(substring in input_row['gene'] for substring in ['IGKV', 'IGLV', 'IGHV']):
+        if any(substring in input_row['gene'] for substring in ['IGKV', 'IGLV', 'IGHV', 'TRBV', 'TRDV','TRGV']):
             start_col, end_col = 'V-REGION_start', 'V-REGION_end'
-        elif any(substring in input_row['gene'] for substring in ['IGKJ', 'IGLJ', 'IGHJ']):
+        elif any(substring in input_row['gene'] for substring in ['IGKJ', 'IGLJ', 'IGHJ', 'TRBJ', 'TRDJ', 'TRGJ']):
             start_col, end_col = 'J-REGION_start', 'J-REGION_end'
-        elif 'IGHD' in input_row['gene']:
+        elif any(substring in input_row['gene'] for substring in ['IGHD', 'TRBD']):
             start_col, end_col = 'D-REGION_start', 'D-REGION_end'
-        elif any(substring in input_row['gene'] for substring in ['IGKC', 'IGLC']):
+        elif any(substring in input_row['gene'] for substring in ['IGKC', 'IGLC', 'TRBC', 'TRDV', 'TRGV']):
             start_col, end_col = 'allele_sequence_start', 'allele_sequence_end'
         else:
             # Skip this row if none of the conditions are met
@@ -52,6 +52,9 @@ def process_files(input_csv, original_output_csv, modified_output_csv):
 input_csv_path = sys.argv[1]
 original_output_csv_path = sys.argv[2]
 modified_output_csv_path = sys.argv[3]
+print(f"Input CSV Path: {input_csv_path}")
+print(f"Original Output CSV Path: {original_output_csv_path}")
+print(f"Modified Output CSV Path: {modified_output_csv_path}")
 
 # Call the function with command-line arguments
 process_files(input_csv_path, original_output_csv_path, modified_output_csv_path)

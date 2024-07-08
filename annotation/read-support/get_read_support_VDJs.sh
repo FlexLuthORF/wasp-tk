@@ -5,7 +5,7 @@ reffn=$2
 IG_loci=$3
 threads=$4
 #masked_ref=/home/egenge01/projects/12_sample_test/reference_IGloci_masked.fasta
-scratch=$PWD
+scratch=$5
 mask_ref=${scratch}/ref_IG_masked.fasta
 
 function run_make_ref_masked {
@@ -16,14 +16,22 @@ samtools faidx ${scratch}/ref_IG_masked.fasta
 }
 
 function run_map_ccs_to_pers {
-    cat $fofn | while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_import igh_gene igh_import ighc_gene ighc_import ccs_bam trb_gene trb_import trg_gene trg_import trd_gene trd_import tra_gene tra_import
+    while IFS=$'\t' read -r sample asm_bam chr2_gene chr2_import chr22_gene chr22_import igh_gene igh_import ighc_gene ighc_import trb_gene trb_import trg_gene trg_import trd_gene trd_import tra_gene tra_import ccs_bam
     do
+    echo sample is ${sample}
     echo ccs bam is ${ccs_bam}
 	mkdir -p ${scratch}/read_support/${sample}
 	outd=${scratch}/read_support/${sample}
 	mkdir -p ${outd}/ccs_to_pers
 	#convert pacbio hifi reads to fasta
-	samtools view ${ccs_bam} | awk '{ print ">"$1"\n"$10 }' > ${outd}/ccs_to_pers/reads.fasta
+	if [[ "${ccs_bam}" == *.bam ]]; then
+        samtools view ${ccs_bam} | awk '{ print ">"$1"\n"$10 }' > ${outd}/ccs_to_pers/reads.fasta
+    elif [[ "${ccs_bam}" == *.fasta ]]; then
+        cp ${ccs_bam} ${outd}/ccs_to_pers/reads.fasta
+    else
+        echo "Unsupported file format"
+    fi
+
 	samtools faidx ${outd}/ccs_to_pers/reads.fasta
 	
 	#create personalized reference
@@ -35,49 +43,60 @@ function run_map_ccs_to_pers {
 	samtools faidx ${outd}/ccs_to_pers/pers_ref.fasta
 	#make not gpu one day
 	minimap2 -ax map-hifi --secondary=no -t ${threads} -L ${outd}/ccs_to_pers/pers_ref.fasta ${outd}/ccs_to_pers/reads.fasta > ${outd}/ccs_to_pers/output.sam;
- samtools view -Sbh ${outd}/ccs_to_pers/output.sam > ${outd}/ccs_to_pers/output.bam;
- samtools sort -@ ${threads} ${outd}/ccs_to_pers/output.bam -o ${outd}/ccs_to_pers/output.sorted.bam;
- samtools index ${outd}/ccs_to_pers/output.sorted.bam;
- wait
-  rm -f ${outd}/ccs_to_pers/output.sam
-    done
+    samtools view -Sbh ${outd}/ccs_to_pers/output.sam > ${outd}/ccs_to_pers/output.bam;
+    samtools sort -@ ${threads} ${outd}/ccs_to_pers/output.bam -o ${outd}/ccs_to_pers/output.sorted.bam;
+    samtools index ${outd}/ccs_to_pers/output.sorted.bam;
+    rm -f ${outd}/ccs_to_pers/output.sam
+    done < $fofn
 }
 
 function run_append_pos {
-    while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_import igh_gene igh_import ighc_gene ighc_import ccs_bam trb_gene trb_import trg_gene trg_import trd_gene trd_import tra_gene tra_import
+    while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_import igh_gene igh_import ighc_gene ighc_import trb_gene trb_import trg_gene trg_import trd_gene trd_import tra_gene tra_import ccs_bam
     do
         # Base directory for imported genes
         base_outd="${scratch}/read_support/${sample}/imported_genes"
         
         # Create subdirectories for each type and define output paths
-        mkdir -p "${base_outd}/chr2"
-        chr2_import_out="${base_outd}/chr2/$(basename "${chr2_import}")"
+        mkdir -p "${base_outd}/IGK"
+        chr2_import_out="${base_outd}/IGK/$(basename "${chr2_import}")"
 
-        mkdir -p "${base_outd}/chr22"
-        chr22_import_out="${base_outd}/chr22/$(basename "${chr22_import}")"
+        mkdir -p "${base_outd}/IGL"
+        chr22_import_out="${base_outd}/IGL/$(basename "${chr22_import}")"
 
-        mkdir -p "${base_outd}/igh"
-        igh_import_out="${base_outd}/igh/$(basename "${igh_import}")"
+        mkdir -p "${base_outd}/IGH"
+        igh_import_out="${base_outd}/IGH/$(basename "${igh_import}")"
 
-        mkdir -p "${base_outd}/ighc"
-        ighc_import_out="${base_outd}/ighc/$(basename "${ighc_import}")"
+        mkdir -p "${base_outd}/IGHC"
+        ighc_import_out="${base_outd}/IGHC/$(basename "${ighc_import}")"
+
+        mkdir -p "${base_outd}/TRB"
+        trb_import_out="${base_outd}/TRB/$(basename "${trb_import}")"
+
+        mkdir -p "${base_outd}/TRG"
+        trg_import_out="${base_outd}/TRG/$(basename "${trg_import}")"
+
+        mkdir -p "${base_outd}/TRD"
+        trd_import_out="${base_outd}/TRD/$(basename "${trd_import}")"
+
+        #mkdir -p "${base_outd}/TRA"
+        #ighc_import_out="${base_outd}/TRA/$(basename "${tra_import}")"
 
         # Call the Python script with input, original output, and modified output paths
-        python append_pos_import_genes.py "${chr2_gene}" "${chr2_import}" "${chr2_import_out}"
-        python append_pos_import_genes.py "${chr22_gene}" "${chr22_import}" "${chr22_import_out}"
-        python append_pos_import_genes.py "${igh_gene}" "${igh_import}" "${igh_import_out}"
-        python append_pos_import_genes.py "${trb_gene}" "${trb_import}" "${trb_import_out}"
-        python append_pos_import_genes.py "${trg_gene}" "${trg_import}" "${trg_import_out}"
-        python append_pos_import_genes.py "${tra_gene}" "${tra_import}" "${tra_import_out}"
-        python append_pos_import_genes.py "${trd_gene}" "${trd_import}" "${trd_import_out}"
+        python /usr/local/bin/append_pos_import_genes.py "${chr2_gene}" "${chr2_import}" "${chr2_import_out}"
+        python /usr/local/bin/append_pos_import_genes.py "${chr22_gene}" "${chr22_import}" "${chr22_import_out}"
+        python /usr/local/bin/append_pos_import_genes.py "${igh_gene}" "${igh_import}" "${igh_import_out}"
+        python /usr/local/bin/append_pos_import_genes.py "${trb_gene}" "${trb_import}" "${trb_import_out}"
+        #python /usr/local/bin/append_pos_import_genes.py "${trg_gene}" "${trg_import}" "${trg_import_out}"
+       # python /usr/local/bin/append_pos_import_genes.py "${tra_gene}" "${tra_import}" "${tra_import_out}"
+        #python /usr/local/bin/append_pos_import_genes.py "${trd_gene}" "${trd_import}" "${trd_import_out}"
 
-        python ighc_append_pos.py "${ighc_gene}" "${ighc_import}" "${ighc_import_out}"
+        python /usr/local/bin/ighc_append_pos.py "${ighc_gene}" "${ighc_import}" "${ighc_import_out}"
 #        python append_pos_import_genes_ighc.py "${ighc_gene}" "${ighc_import}" "${ighc_import_out}"
     done < $fofn
 }
 
 function get_read_support_vdj3 {
-    while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_import igh_gene igh_import ighc_gene ighc_import ccs_bam trb_gene trb_import trg_gene trg_import trd_gene trd_import tra_gene tra_import
+    while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_import igh_gene igh_import ighc_gene ighc_import trb_gene trb_import trg_gene trg_import trd_gene trd_import tra_gene tra_import ccs_bam
     do
         base_outd="${scratch}/read_support/${sample}/imported_genes"
         bam_file="${scratch}/read_support/${sample}/ccs_to_pers/output.sorted.bam" # ccs reads to personalized reference
@@ -87,7 +106,8 @@ function get_read_support_vdj3 {
             samtools index "$bam_file"
         fi
 
-        for gene_type in "chr2" "chr22" "igh" "trb" "trg" "tra" "trd" #"ighc"
+        #for gene_type in "chr2" "chr22" "igh" "trb" "trg" "tra" "trd" #"ighc"
+        for gene_type in "IGK" "IGL" "IGH" "TRB" #"TRG" #"TRD" "TRA" #"ighc"
         do
             import_out="${base_outd}/${gene_type}/${sample}_make_gene_file_imported.csv"
 
@@ -158,7 +178,7 @@ END {
     avg_reads_per_position = (total_positions > 0) ? total_reads / total_positions : 0;
     percent_accuracy = (matched_positions / total_positions) * 100;
     print total_positions, avg_reads_per_position, mismatched_positions, matched_positions, mismatch_list, match_list, percent_accuracy, positions_with_10x;}' OFS=',' >> "${tmp_file}_awk_out"
-		    python match_subsequences.py "$tmp_bam" "$contig" "$start" "$end" "$gene" "$import_out" > "${tmp_file}_py_out"
+		    python /usr/local/bin/match_subsequences.py "$tmp_bam" "$contig" "$start" "$end" "$gene" "$import_out" > "${tmp_file}_py_out"
 		    wait
 		    paste -d ',' "${tmp_file}_awk_out" "${tmp_file}_py_out" >> "$tmp_file"
 		    rm "${tmp_file}_awk_out" "${tmp_file}_py_out"
@@ -194,7 +214,7 @@ END {
 
 
 function get_read_support_ighc {
-cat $fofn | while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_import igh_gene igh_import ighc_gene ighc_import ccs_bam trb_gene trb_import trg_gene trg_import trd_gene trd_import tra_gene tra_import
+cat $fofn | while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_import igh_gene igh_import ighc_gene ighc_import trb_gene trb_import trg_gene trg_import trd_gene trd_import tra_gene tra_import ccs_bam
     do
         base_outd="${scratch}/read_support/${sample}/imported_genes"
         bam_file="${scratch}/read_support/${sample}/ccs_to_pers/output.sorted.bam" # ccs reads to personalized reference
@@ -204,7 +224,7 @@ cat $fofn | while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_imp
             samtools index "$bam_file"
         fi
 
-        for gene_type in "ighc" #"chr2" "chr22" "igh"
+        for gene_type in "IGHC" #"chr2" "chr22" "igh"
         do
            # import_out="${base_outd}/${gene_type}/${sample}_make_gene_file_imported.csv"
              import_out="${base_outd}/${gene_type}/IGenotyper_imported_genes.csv"
@@ -321,7 +341,7 @@ cat $fofn | while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_imp
                         percent_accuracy = (matched_positions / total_positions) * 100;
                         print total_positions, total_reads, mismatched_positions, matched_positions, mismatch_list, match_list, mismatched_positions_coverage_less_than_10, mismatched_positions_coverage_10_or_greater, matched_positions_coverage_less_than_10, matched_positions_coverage_10_or_greater, percent_accuracy;
                     }' OFS=',' >> "${tmp_file}_awk_out"
-		    python ighc_match3.py "$tmp_bam" "$contig" "$gene" "$modified_import_out" > "${tmp_file}_py_out"
+		    python /usr/local/bin/ighc_match3.py "$tmp_bam" "$contig" "$gene" "$modified_import_out" > "${tmp_file}_py_out"
 		    wait
 		    paste -d ',' "${tmp_file}_awk_out" "${tmp_file}_py_out" >> "$tmp_file"
 		    rm "${tmp_file}_awk_out" "${tmp_file}_py_out"
@@ -360,3 +380,4 @@ run_map_ccs_to_pers
 run_append_pos
 get_read_support_vdj3
 get_read_support_ighc
+rm ${scratch}/ref_IG_masked.fasta
