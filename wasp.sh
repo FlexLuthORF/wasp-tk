@@ -25,7 +25,7 @@ mkdir -p $outdir
 
 # Processing steps
 #singularity exec ${container}
-bash /usr/local/bin/create_fofn_from_asm.sh "${outdir}" "${sample}" "${ccs}" "${asm}"
+bash /opt/wasp/scripts/annotation/create_fofn_from_asm.sh "${outdir}" "${sample}" "${ccs}" "${asm}"
 fofn="${outdir}/fofn.tsv"
-python /usr/local/bin/process_alleles.py ${sample} ${asm} ${reference_fasta} ${bed_dir} ${allele_ref_dir} ${outdir}
-bash /usr/local/bin/get_read_support_VDJs.sh ${fofn} ${reference_fasta} ${bed_dir}/IG_loci.bed ${threads} ${outdir}
+python /opt/wasp/scripts/annotation/process_alleles.py ${sample} ${asm} ${reference_fasta} ${bed_dir} ${allele_ref_dir} ${outdir}
+bash /opt/wasp/scripts/annotation/read-support/get_read_support_VDJs.sh ${fofn} ${reference_fasta} ${bed_dir}/IG_loci.bed ${threads} ${outdir} ${minimap_option}

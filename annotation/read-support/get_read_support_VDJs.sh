@@ -6,6 +6,7 @@ IG_loci=$3
 threads=$4
 #masked_ref=/home/egenge01/projects/12_sample_test/reference_IGloci_masked.fasta
 scratch=$5
+minimap_option=$6
 mask_ref=${scratch}/ref_IG_masked.fasta
 
 function run_make_ref_masked {
@@ -42,7 +43,7 @@ function run_map_ccs_to_pers {
 	    > ${outd}/ccs_to_pers/pers_ref.fasta
 	samtools faidx ${outd}/ccs_to_pers/pers_ref.fasta
 	#make not gpu one day
-	minimap2 -ax map-hifi --secondary=no -t ${threads} -L ${outd}/ccs_to_pers/pers_ref.fasta ${outd}/ccs_to_pers/reads.fasta > ${outd}/ccs_to_pers/output.sam;
+	minimap2 -ax ${minimap_option} --secondary=no -t ${threads} -L ${outd}/ccs_to_pers/pers_ref.fasta ${outd}/ccs_to_pers/reads.fasta > ${outd}/ccs_to_pers/output.sam;
     samtools view -Sbh ${outd}/ccs_to_pers/output.sam > ${outd}/ccs_to_pers/output.bam;
     samtools sort -@ ${threads} ${outd}/ccs_to_pers/output.bam -o ${outd}/ccs_to_pers/output.sorted.bam;
     samtools index ${outd}/ccs_to_pers/output.sorted.bam;
@@ -82,15 +83,15 @@ function run_append_pos {
         #ighc_import_out="${base_outd}/TRA/$(basename "${tra_import}")"
 
         # Call the Python script with input, original output, and modified output paths
-        python /usr/local/bin/append_pos_import_genes.py "${chr2_gene}" "${chr2_import}" "${chr2_import_out}"
-        python /usr/local/bin/append_pos_import_genes.py "${chr22_gene}" "${chr22_import}" "${chr22_import_out}"
-        python /usr/local/bin/append_pos_import_genes.py "${igh_gene}" "${igh_import}" "${igh_import_out}"
-        python /usr/local/bin/append_pos_import_genes.py "${trb_gene}" "${trb_import}" "${trb_import_out}"
-        #python /usr/local/bin/append_pos_import_genes.py "${trg_gene}" "${trg_import}" "${trg_import_out}"
-       # python /usr/local/bin/append_pos_import_genes.py "${tra_gene}" "${tra_import}" "${tra_import_out}"
-        #python /usr/local/bin/append_pos_import_genes.py "${trd_gene}" "${trd_import}" "${trd_import_out}"
+        python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${chr2_gene}" "${chr2_import}" "${chr2_import_out}"
+        python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${chr22_gene}" "${chr22_import}" "${chr22_import_out}"
+        python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${igh_gene}" "${igh_import}" "${igh_import_out}"
+        python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${trb_gene}" "${trb_import}" "${trb_import_out}"
+        #python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${trg_gene}" "${trg_import}" "${trg_import_out}"
+       # python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${tra_gene}" "${tra_import}" "${tra_import_out}"
+        #python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${trd_gene}" "${trd_import}" "${trd_import_out}"
 
-        python /usr/local/bin/ighc_append_pos.py "${ighc_gene}" "${ighc_import}" "${ighc_import_out}"
+        python /opt/wasp/scripts/annotation/read-support/ighc_append_pos.py "${ighc_gene}" "${ighc_import}" "${ighc_import_out}"
 #        python append_pos_import_genes_ighc.py "${ighc_gene}" "${ighc_import}" "${ighc_import_out}"
     done < $fofn
 }
@@ -178,7 +179,7 @@ END {
     avg_reads_per_position = (total_positions > 0) ? total_reads / total_positions : 0;
     percent_accuracy = (matched_positions / total_positions) * 100;
     print total_positions, avg_reads_per_position, mismatched_positions, matched_positions, mismatch_list, match_list, percent_accuracy, positions_with_10x;}' OFS=',' >> "${tmp_file}_awk_out"
-		    python /usr/local/bin/match_subsequences.py "$tmp_bam" "$contig" "$start" "$end" "$gene" "$import_out" > "${tmp_file}_py_out"
+		    python /opt/wasp/scripts/annotation/read-support/match_subsequences.py "$tmp_bam" "$contig" "$start" "$end" "$gene" "$import_out" > "${tmp_file}_py_out"
 		    wait
 		    paste -d ',' "${tmp_file}_awk_out" "${tmp_file}_py_out" >> "$tmp_file"
 		    rm "${tmp_file}_awk_out" "${tmp_file}_py_out"
@@ -226,8 +227,8 @@ cat $fofn | while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_imp
 
         for gene_type in "IGHC" #"chr2" "chr22" "igh"
         do
-           # import_out="${base_outd}/${gene_type}/${sample}_make_gene_file_imported.csv"
-             import_out="${base_outd}/${gene_type}/IGenotyper_imported_genes.csv"
+             import_out="${base_outd}/${gene_type}/${sample}_make_gene_file_imported.csv"
+             #import_out="${base_outd}/${gene_type}/IGenotyper_imported_genes.csv"
             if [[ -f "$import_out" ]]; then
                 # Use csvcut to remove the "notes" column, which causes problems and can have or always has a comma
                 #csvcut -C "notes" "$import_out" > "${import_out%.csv}_nonotes.csv"
@@ -341,7 +342,7 @@ cat $fofn | while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_imp
                         percent_accuracy = (matched_positions / total_positions) * 100;
                         print total_positions, total_reads, mismatched_positions, matched_positions, mismatch_list, match_list, mismatched_positions_coverage_less_than_10, mismatched_positions_coverage_10_or_greater, matched_positions_coverage_less_than_10, matched_positions_coverage_10_or_greater, percent_accuracy;
                     }' OFS=',' >> "${tmp_file}_awk_out"
-		    python /usr/local/bin/ighc_match3.py "$tmp_bam" "$contig" "$gene" "$modified_import_out" > "${tmp_file}_py_out"
+		    python /opt/wasp/scripts/annotation/read-support/ighc_match3.py "$tmp_bam" "$contig" "$gene" "$modified_import_out" > "${tmp_file}_py_out"
 		    wait
 		    paste -d ',' "${tmp_file}_awk_out" "${tmp_file}_py_out" >> "$tmp_file"
 		    rm "${tmp_file}_awk_out" "${tmp_file}_py_out"
