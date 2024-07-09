@@ -20,7 +20,7 @@ def get_gene_type(label):
         return 'C'
 
 
-def read_beds(assembly_name, sense, dir, assemblies=None):
+def read_beds(assembly_name, sense, dir, assemblies=None, locus=None):
     """
      Read co-ordinates for an assembly from all BED files in a given directory
 
@@ -30,6 +30,7 @@ def read_beds(assembly_name, sense, dir, assemblies=None):
      :type dir: str
      :param assemblies: Sequences of the assemblies listed in the BED files. If not provided, the output will not contain motif sequences
      :type assemblies: dict
+     :param locus: e.g. IGH, TRA. If specified, only coords matching the specified locus will be returned
 
      :return: Data structure containing, for each assembly, and for each gene in the assembly, the co-ordinates of the features denoted by the BED files.
      :rtype: dict of dicts
@@ -50,6 +51,9 @@ def read_beds(assembly_name, sense, dir, assemblies=None):
                 reader = csv.DictReader(fi, delimiter='\t', fieldnames=['assembly_name', 'start', 'end', 'gene', 'sense'])
                 for row in reader:
                     if not row['gene'] or row['assembly_name'] != assembly_name:
+                        continue
+
+                    if locus and locus not in row['gene']:
                         continue
 
                     if row['start'] and row['end']:

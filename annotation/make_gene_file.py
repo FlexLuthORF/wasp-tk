@@ -453,7 +453,7 @@ def main():
     print("Reading assembly")
     assemblies = read_sequence_from_fasta(args.ref_seq, args.ref_seq+'.fai', refname)
     print("Reading BED files")
-    beds = read_beds(refname, sense, args.bed_dir, assemblies)
+    beds = read_beds(refname, sense, args.bed_dir, assemblies, locus)
     rows = []
 
     if args.bam:
@@ -532,3 +532,4 @@ def process_bams(args, locus, refname, sense, beds, rows, project, subject, samp
 
 if __name__ == '__main__':
     main()
+

@@ -78,6 +78,9 @@ function run_append_pos {
 
         mkdir -p "${base_outd}/TRD"
         trd_import_out="${base_outd}/TRD/$(basename "${trd_import}")"
+       
+        mkdir -p "${base_outd}/TRA"
+        tra_import_out="${base_outd}/TRA/$(basename "${tra_import}")"
 
         #mkdir -p "${base_outd}/TRA"
         #ighc_import_out="${base_outd}/TRA/$(basename "${tra_import}")"
@@ -87,9 +90,9 @@ function run_append_pos {
         python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${chr22_gene}" "${chr22_import}" "${chr22_import_out}"
         python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${igh_gene}" "${igh_import}" "${igh_import_out}"
         python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${trb_gene}" "${trb_import}" "${trb_import_out}"
-        #python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${trg_gene}" "${trg_import}" "${trg_import_out}"
-       # python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${tra_gene}" "${tra_import}" "${tra_import_out}"
-        #python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${trd_gene}" "${trd_import}" "${trd_import_out}"
+        python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${trg_gene}" "${trg_import}" "${trg_import_out}"
+        python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${tra_gene}" "${tra_import}" "${tra_import_out}"
+        python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${trd_gene}" "${trd_import}" "${trd_import_out}"
 
         python /opt/wasp/scripts/annotation/read-support/ighc_append_pos.py "${ighc_gene}" "${ighc_import}" "${ighc_import_out}"
 #        python append_pos_import_genes_ighc.py "${ighc_gene}" "${ighc_import}" "${ighc_import_out}"
@@ -108,7 +111,7 @@ function get_read_support_vdj3 {
         fi
 
         #for gene_type in "chr2" "chr22" "igh" "trb" "trg" "tra" "trd" #"ighc"
-        for gene_type in "IGK" "IGL" "IGH" "TRB" #"TRG" #"TRD" "TRA" #"ighc"
+        for gene_type in "IGK" "IGL" "IGH" "TRB" "TRG" "TRD" "TRA" #"ighc"
         do
             import_out="${base_outd}/${gene_type}/${sample}_make_gene_file_imported.csv"
 

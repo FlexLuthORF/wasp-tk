@@ -19,13 +19,13 @@ def process_files(input_csv, original_output_csv, modified_output_csv):
     # Iterate over each row in the input DataFrame
     for _, input_row in input_df.iterrows():
         # Define the start and end column names based on the 'gene' column value
-        if any(substring in input_row['gene'] for substring in ['IGKV', 'IGLV', 'IGHV', 'TRBV', 'TRDV','TRGV']):
+        if any(substring in input_row['gene'] for substring in ['IGKV', 'IGLV', 'IGHV', 'TRBV', 'TRDV','TRGV','TRAV']):
             start_col, end_col = 'V-REGION_start', 'V-REGION_end'
-        elif any(substring in input_row['gene'] for substring in ['IGKJ', 'IGLJ', 'IGHJ', 'TRBJ', 'TRDJ', 'TRGJ']):
+        elif any(substring in input_row['gene'] for substring in ['IGKJ', 'IGLJ', 'IGHJ', 'TRBJ', 'TRDJ', 'TRGJ','TRAJ']):
             start_col, end_col = 'J-REGION_start', 'J-REGION_end'
-        elif any(substring in input_row['gene'] for substring in ['IGHD', 'TRBD']):
+        elif any(substring in input_row['gene'] for substring in ['IGHD', 'TRBD', 'TRDD']):
             start_col, end_col = 'D-REGION_start', 'D-REGION_end'
-        elif any(substring in input_row['gene'] for substring in ['IGKC', 'IGLC', 'TRBC', 'TRDV', 'TRGV']):
+        elif any(substring in input_row['gene'] for substring in ['IGKC', 'IGLC', 'TRBC', 'TRDC', 'TRGC', 'TRAC']):
             start_col, end_col = 'allele_sequence_start', 'allele_sequence_end'
         else:
             # Skip this row if none of the conditions are met
@@ -42,8 +42,11 @@ def process_files(input_csv, original_output_csv, modified_output_csv):
                 output_df.at[idx, 'REGION_end'] = input_row[end_col]
 
     # Replace all commas in the 'notes' column with semicolons
+   # if 'notes' in output_df.columns:
+    #    output_df['notes'] = output_df['notes'].str.replace(',', ';', regex=False)
     if 'notes' in output_df.columns:
-        output_df['notes'] = output_df['notes'].str.replace(',', ';', regex=False)
+        # Convert column to string, replacing NaN with an empty string before replacing characters
+        output_df['notes'] = output_df['notes'].fillna('').astype(str).str.replace(',', ';', regex=False)
 
     # Save the modified DataFrame back to the new output CSV
     output_df.to_csv(modified_output_csv, index=False)

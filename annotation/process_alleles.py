@@ -30,9 +30,9 @@ def process_sample(sample_id, bam_path, ref, bed_dir, allele_ref_dir, outdir):
         ('IGK', 'chr2'),
         ('IGL', 'chr22'),
         ('TRB', 'trb'),
-       # ('TRG', 'chr7'),
-        #('TRD', 'chr14'),
-       # ('TRA', 'chr14')
+        ('TRG', 'chr7'),
+        ('TRD', 'chr14'),
+        ('TRA', 'chr14')
     ]
     #output_base_dir = os.path.dirname(os.path.dirname(bam_path))
     #merged_outfile = f"{output_base_dir}/annotations/{sample_id}/merged_annotations.csv"

@@ -510,7 +510,7 @@ def main():
     refname = args.refname
     sense = args.sense
     assemblies = {refname: read_sequence_from_fasta(args.ref_seq, args.ref_seq+'.fai', refname)}
-    beds = read_beds(refname, sense, args.bed_dir, assemblies)
+    beds = read_beds(refname, sense, args.bed_dir, assemblies, locus)
 
     with open(args.gene_file, 'r') as fi, open(args.outfile, 'w', newline='') as fo:
         row_count = 0
