@@ -85,17 +85,17 @@ function run_append_pos {
         #mkdir -p "${base_outd}/TRA"
         #ighc_import_out="${base_outd}/TRA/$(basename "${tra_import}")"
 
-        # Call the Python script with input, original output, and modified output paths
-        python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${chr2_gene}" "${chr2_import}" "${chr2_import_out}"
-        python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${chr22_gene}" "${chr22_import}" "${chr22_import_out}"
-        python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${igh_gene}" "${igh_import}" "${igh_import_out}"
-        python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${trb_gene}" "${trb_import}" "${trb_import_out}"
-        python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${trg_gene}" "${trg_import}" "${trg_import_out}"
-        python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${tra_gene}" "${tra_import}" "${tra_import_out}"
-        python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${trd_gene}" "${trd_import}" "${trd_import_out}"
+        # Call the /opt/wasp/conda/bin/python script with input, original output, and modified output paths
+        /opt/wasp/conda/bin/python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${chr2_gene}" "${chr2_import}" "${chr2_import_out}"
+        /opt/wasp/conda/bin/python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${chr22_gene}" "${chr22_import}" "${chr22_import_out}"
+        /opt/wasp/conda/bin/python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${igh_gene}" "${igh_import}" "${igh_import_out}"
+        /opt/wasp/conda/bin/python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${trb_gene}" "${trb_import}" "${trb_import_out}"
+        /opt/wasp/conda/bin/python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${trg_gene}" "${trg_import}" "${trg_import_out}"
+        /opt/wasp/conda/bin/python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${tra_gene}" "${tra_import}" "${tra_import_out}"
+        /opt/wasp/conda/bin/python /opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py "${trd_gene}" "${trd_import}" "${trd_import_out}"
 
-        python /opt/wasp/scripts/annotation/read-support/ighc_append_pos.py "${ighc_gene}" "${ighc_import}" "${ighc_import_out}"
-#        python append_pos_import_genes_ighc.py "${ighc_gene}" "${ighc_import}" "${ighc_import_out}"
+        /opt/wasp/conda/bin/python /opt/wasp/scripts/annotation/read-support/ighc_append_pos.py "${ighc_gene}" "${ighc_import}" "${ighc_import_out}"
+#        /opt/wasp/conda/bin/python append_pos_import_genes_ighc.py "${ighc_gene}" "${ighc_import}" "${ighc_import_out}"
     done < $fofn
 }
 
@@ -182,7 +182,7 @@ END {
     avg_reads_per_position = (total_positions > 0) ? total_reads / total_positions : 0;
     percent_accuracy = (matched_positions / total_positions) * 100;
     print total_positions, avg_reads_per_position, mismatched_positions, matched_positions, mismatch_list, match_list, percent_accuracy, positions_with_10x;}' OFS=',' >> "${tmp_file}_awk_out"
-		    python /opt/wasp/scripts/annotation/read-support/match_subsequences.py "$tmp_bam" "$contig" "$start" "$end" "$gene" "$import_out" > "${tmp_file}_py_out"
+		    /opt/wasp/conda/bin/python /opt/wasp/scripts/annotation/read-support/match_subsequences.py "$tmp_bam" "$contig" "$start" "$end" "$gene" "$import_out" > "${tmp_file}_py_out"
 		    wait
 		    paste -d ',' "${tmp_file}_awk_out" "${tmp_file}_py_out" >> "$tmp_file"
 		    rm "${tmp_file}_awk_out" "${tmp_file}_py_out"
@@ -301,7 +301,7 @@ cat $fofn | while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_imp
                     samtools view -F 0x100 -F 0x800 -b "$bam_file" -o "$tmp_bam" -U "/dev/null" "${contig}:${start}-${end}"
                     samtools index "$tmp_bam"
                     
-		    total_positions=$(awk '{sum += $3 - $2} END {print sum}' "$bed_file")
+		    total_positions=$(awk '{sum += ($3 - $2)+1} END {print sum}' "$bed_file")
                     samtools mpileup -f "$ref" -l "$bed_file" "$tmp_bam" | \
 			awk -v total_positions="$total_positions" \
                     'BEGIN {
@@ -332,7 +332,7 @@ cat $fofn | while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_imp
                             }
                         }
 
-                        if (match_rate > 0.8) {
+                        if (match_rate >= 0.8) {
                             matched_positions++;
                             if (coverage < 10) {
                                 matched_positions_coverage_less_than_10++;
@@ -345,7 +345,7 @@ cat $fofn | while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_imp
                         percent_accuracy = (matched_positions / total_positions) * 100;
                         print total_positions, total_reads, mismatched_positions, matched_positions, mismatch_list, match_list, mismatched_positions_coverage_less_than_10, mismatched_positions_coverage_10_or_greater, matched_positions_coverage_less_than_10, matched_positions_coverage_10_or_greater, percent_accuracy;
                     }' OFS=',' >> "${tmp_file}_awk_out"
-		    python /opt/wasp/scripts/annotation/read-support/ighc_match3.py "$tmp_bam" "$contig" "$gene" "$modified_import_out" > "${tmp_file}_py_out"
+		    /opt/wasp/conda/bin/python /opt/wasp/scripts/annotation/read-support/ighc_match3.py "$tmp_bam" "$contig" "$gene" "$modified_import_out" > "${tmp_file}_py_out"
 		    wait
 		    paste -d ',' "${tmp_file}_awk_out" "${tmp_file}_py_out" >> "$tmp_file"
 		    rm "${tmp_file}_awk_out" "${tmp_file}_py_out"
