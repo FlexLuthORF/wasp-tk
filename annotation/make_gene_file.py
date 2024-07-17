@@ -115,6 +115,9 @@ HAPLOTYPE_WARNING = False
 def fetch_contigs(samfile, chrom, start, end, annotation_ranges, verbose):
     contigs = []
 
+    #if verbose:
+    #    breakpoint()
+
     for read in samfile.fetch(chrom, start, end):
         if read.is_secondary:
             verbose_print(f"{read.qname}: secondary alignment", verbose)
@@ -136,6 +139,7 @@ def fetch_contigs(samfile, chrom, start, end, annotation_ranges, verbose):
         q_end = None
         leading_dels = 0
 
+        picked_pairs = []
         for query, ref in read.get_aligned_pairs():
             if ref and ref == start:    # q_start is where we want to take our query sequence from...
                 q_start = query         # but if it is None at this point, the first base is a deletion
@@ -143,18 +147,21 @@ def fetch_contigs(samfile, chrom, start, end, annotation_ranges, verbose):
                 q_start = query
             if ref is not None and q_start is None:                     # and in the meantime count the leading deletions
                 leading_dels += 1
-            if query is not None:
+            if query is not None and (ref is None or ref <= end):       # make sure q_end never runs past the end, but always runs right up to it
                 q_end = query
+
+            if q_start and q_start >= 0:
+                picked_pairs.append((query, ref))
 
             if ref and ref >= end:
                 break
 
         name = read.query_name
 
-        seq = read.query_sequence[q_start:q_end]
-        if len(seq) < 2:
-            verbose_print(f"{read.qname}: no useful alignment with ref 1", verbose)
-            continue
+        if q_start is None or q_end is None:
+            seq = ''
+        else:
+            seq = read.query_sequence[q_start:q_end+1]
 
         haplotype = None
         for el in name.split('_'):
@@ -201,7 +208,6 @@ def fetch_contigs(samfile, chrom, start, end, annotation_ranges, verbose):
                 cig = Cigar(annotations[r[2] + '_CIGAR'])
                 if cig.__len__() != len(annotations[r[2]]):
                     print(f'Error in cigar string length for annotation {r[2]}')
-                    breakpoint()
 
         # bump up each coord by 1 to make them 1-based
         def finalise_coords(contig_coords):
@@ -422,8 +428,6 @@ def main():
     parser.add_argument('ref_seq', help='pathname to a FASTA file holding the reference sequence (in the same orientation as the BED files use it)')
     parser.add_argument('outfile', help='output file that will contain all the VDJ gene field data (csv)')
     parser.add_argument('--debug_gene', help='print debug output on the processing of this gene')
-    
-
     parser.add_argument('--bam', '-b', help='pathname to a single BAM file')
     parser.add_argument('--project', '-p', default='Unknown', help='project name for the single BAM file')
     parser.add_argument('--subject', '-s', default='Unknown', help='subject name for the single BAM file')

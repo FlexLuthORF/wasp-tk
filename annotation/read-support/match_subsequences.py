@@ -21,13 +21,13 @@ def get_sequence_from_csv(import_csv, gene_key, contig, start, end):
                 if 'sense' in row and row['sense'] == '-':
                     reverse_comp = True
                 # Determine the correct column for the sequence based on the gene key
-                if any(substring in gene_key for substring in ['IGKV', 'IGLV', 'IGHV']):
+                if any(substring in gene_key for substring in ['IGKV', 'IGLV', 'IGHV', 'TRAV', 'TRBV', 'TRDV', 'TRGV' ]):
                     sequence_column = 'V-REGION'
-                elif any(substring in gene_key for substring in ['IGKJ', 'IGLJ', 'IGHJ']):
+                elif any(substring in gene_key for substring in ['IGKJ', 'IGLJ', 'IGHJ', 'TRAJ', 'TRBJ', 'TRDJ', 'TRGJ']):
                     sequence_column = 'J-REGION'
-                elif 'IGHD' in gene_key:
+                elif any(substring in gene_key for substring in ['IGHD', 'TRBD', 'TRGD']):
                     sequence_column = 'D-REGION'
-                elif any(substring in gene_key for substring in ['IGKC', 'IGLC']):
+                elif any(substring in gene_key for substring in ['IGKC', 'IGLC', 'TRAC', 'TRBC', 'TRDC', 'TRGC']):
                     sequence_column = 'C-REGION'
                 else:
                     continue  # Skip if no matching column is found

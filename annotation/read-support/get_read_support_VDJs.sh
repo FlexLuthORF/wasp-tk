@@ -280,16 +280,17 @@ cat $fofn | while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_imp
 		    > "$bed_file"
 		    
 		    # Iterate over each exon start and end index pair from the exon_cols associative array
-		    for key in "${!exon_cols[@]}"; do
-			if [[ $key =~ C-EXON_[1-9]_start ]]; then
-			    exon_start=$(echo "${line[${exon_cols[$key]}]}" | awk '{printf "%.0f", $1}')
-			    exon_end_key="${key/_start/_end}"  # Replace 'start' with 'end' to get the corresponding end key
-			    exon_end=$(echo "${line[${exon_cols[$exon_end_key]}]}" | awk '{printf "%.0f", $1}')
-			    
-			    # Write the contig, exon start, and exon end to the BED file
-			    echo -e "${contig}\t${exon_start}\t${exon_end}" >> "$bed_file"
-			fi
-		    done
+# Iterate over each exon start and end index pair from the exon_cols associative array
+            for key in "${!exon_cols[@]}"; do
+                if [[ $key =~ C-EXON_[1-9]_start ]]; then
+                    exon_start=$(echo "${line[${exon_cols[$key]}]}" | awk '{printf "%.0f", $1-1}')
+                    exon_end_key="${key/_start/_end}"  # Replace 'start' with 'end' to get the corresponding end key
+                    exon_end=$(echo "${line[${exon_cols[$exon_end_key]}]}" | awk '{printf "%.0f", $1}')
+
+                            # Write the contig, exon start, and exon end to the BED file
+                    echo -e "${contig}\t${exon_start}\t${exon_end}" | awk '{if ($3 !=0) print $0}' >> "$bed_file"
+                fi
+            done
 		    
 		    gene="${line[$gene_col]}"  # Extract the 'gene' value using the identified column index
 		    
@@ -301,7 +302,7 @@ cat $fofn | while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_imp
                     samtools view -F 0x100 -F 0x800 -b "$bam_file" -o "$tmp_bam" -U "/dev/null" "${contig}:${start}-${end}"
                     samtools index "$tmp_bam"
                     
-		    total_positions=$(awk '{sum += ($3 - $2)+1} END {print sum}' "$bed_file")
+		    total_positions=$(awk '{sum += ($3 - $2)} END {print sum}' "$bed_file")
                     samtools mpileup -f "$ref" -l "$bed_file" "$tmp_bam" | \
 			awk -v total_positions="$total_positions" \
                     'BEGIN {
@@ -313,13 +314,14 @@ cat $fofn | while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_imp
                         matched_positions_coverage_10_or_greater=0;
                     }
                     {
-                        total_reads += length($5);
-                        mismatches = length(gensub(/[.,]/, "", "g", $5));
+                        total_reads += $4;
+                        #mismatches = length(gensub(/[.,]/, "", "g", $5));
                         matches = length(gensub(/[^.,]/, "", "g", $5));
+                        mismatches = $4 - matches
                         mismatch_list = (mismatch_list == "" ? mismatches : mismatch_list ":" mismatches);
                         match_list = (match_list == "" ? matches : match_list ":" matches);
 
-                        coverage = length($5);
+                        coverage = $4;
                         mismatch_rate = mismatches / coverage;
                         match_rate = matches / coverage;
 

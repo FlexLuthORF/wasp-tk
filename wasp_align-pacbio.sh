@@ -25,8 +25,8 @@ mkdir -p $outdir
 
 # Processing steps
 #singularity exec ${container}
-bash /usr/local/bin/create_fofn_from_asm.sh "${outdir}" "${sample}" "${ccs}"
+bash /opt/wasp/scripts/annotation/create_fofn_from_asm.sh "${outdir}" "${sample}" "${ccs}"
 fofn="${outdir}/fofn.tsv"
-bash /usr/local/bin/pipeline.sh ${outdir} ${ccs} ${threads} ${sample} ${reference_fasta}
-python /usr/local/bin/process_alleles.py ${sample} ${outdir}/merged_bam/final_asm20_to_ref_with_secondarySeq/${sample}.sorted.bam ${reference_fasta} ${bed_dir} ${allele_ref_dir} ${outdir}
-bash /usr/local/bin/get_read_support_VDJs.sh ${fofn} ${reference_fasta} ${bed_dir}/IG_loci.bed ${threads}
+bash /opt/wasp/scripts/hifi-mapping/pipeline.sh ${outdir} ${ccs} ${threads} ${sample} ${reference_fasta}
+/opt/wasp/conda/binpython /opt/wasp/scripts/annotation/process_alleles.py ${sample} ${outdir}/merged_bam/final_asm20_to_ref_with_secondarySeq/${sample}.sorted.bam ${reference_fasta} ${bed_dir} ${allele_ref_dir} ${outdir}
+bash /opt/wasp/scripts/annotation/read-support/get_read_support_VDJs.sh ${fofn} ${reference_fasta} ${bed_dir}/IG_loci.bed ${threads}
