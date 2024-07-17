@@ -242,8 +242,9 @@ cat $fofn | while read sample asm_bam chr2_gene chr2_import chr22_gene chr22_imp
 
 
                 tmp_file="${import_out}_read_support.tmp"
-                echo "Total_Positions,Total_Reads_by_Positions,Mismatched_Positions,Matched_Positions,Position_Mismatches,Position_Matches,Mismatched_Positions_Coverage_Less_Than_10,Mismatched_Positions_Coverage_10_Or_Greater,Matched_Positions_Coverage_Less_Than_10,Matched_Positions_Coverage_10_Or_Greater,Percent_Accuracy,Fully_Spanning_Allele_reads,Fully_Spanning_Allele_reads_100_Match_e1,Fully_Spanning_Allele_reads_100_Match_e2,Fully_Spanning_Allele_reads_100_Match_e3,Fully_Spanning_Allele_reads_100_Match_e4,Fully_Spanning_Allele_reads_100_Match_e5,Fully_Spanning_Allele_reads_100_Match_e6,Fully_Spanning_Allele_reads_100_Match_e7,Fully_Spanning_Allele_reads_100_Match_e8,Fully_Spanning_Allele_reads_100_Match_e9" > "$tmp_file"
-		
+
+		echo "Total_Positions,Total_Reads_by_Positions,Mismatched_Positions,Matched_Positions,Position_Mismatches,Position_Matches,Mismatched_Positions_Coverage_Less_Than_10,Mismatched_Positions_Coverage_10_Or_Greater,Matched_Positions_Coverage_Less_Than_10,Matched_Positions_Coverage_10_Or_Greater,Percent_Accuracy,Fully_Spanning_Allele_reads,Fully_Spanning_Allele_reads_100_Match,Allele_reads_100_Match_e1,Allele_reads_100_Match_e2,Allele_reads_100_Match_e3,Allele_reads_100_Match_e4,Allele_reads_100_Match_e5,Allele_reads_100_Match_e6,Allele_reads_100_Match_e7,Allele_reads_100_Match_e8,Allele_reads_100_Match_e9" > "$tmp_file"
+
 		header=$(head -n 1 "$modified_import_out")
 		IFS=',' read -ra header_cols <<< "$header"
 		declare -A exon_cols  # Use an associative array to store exon column indices

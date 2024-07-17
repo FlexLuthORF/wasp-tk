@@ -39,6 +39,8 @@ def count_matching_reads(bamfile, sequences, regions):
         contig = str(region[0])  # Ensure this is a string as expected
         full_span_count = 0
         perfect_matches = [0] * len(sequences)
+        all_matches = [0] * len(sequences)
+        full_span_all_match_count = 0
         for read in samfile.fetch(str(contig), start, end):  # Pass contig correctly
             if read.is_unmapped or read.is_secondary or read.is_supplementary:
                 continue
@@ -47,10 +49,16 @@ def count_matching_reads(bamfile, sequences, regions):
                 read_seq = read.query_sequence
                 for idx, sequence in enumerate(sequences):
                     if sequence and (sequence in read_seq or reverse_complement(sequence) in read_seq):
-                        perfect_matches[idx] += 1
+                        all_matches[idx] = 1
+                if 0 not in all_matches:
+                    full_span_all_match_count += 1
+            read_seq = read.query_sequence
+            for idx, sequence in enumerate(sequences):
+                if sequence and (sequence in read_seq or reverse_complement(sequence) in read_seq):
+                    perfect_matches[idx] += 1
         full_span_counts.append(full_span_count)
         perfect_match_counts.append(perfect_matches)
-    return full_span_counts, perfect_match_counts
+    return full_span_counts, str(full_span_all_match_count), perfect_match_counts
 
 if __name__ == '__main__':
     bamfile = sys.argv[1]
@@ -60,8 +68,8 @@ if __name__ == '__main__':
 
     sequences, regions = get_sequences_and_regions_from_csv(import_csv, gene_key, contig)
     if sequences and regions:
-        full_span_counts, perfect_match_counts = count_matching_reads(bamfile, sequences, regions)
+        full_span_counts, full_span_all_match_count, perfect_match_counts = count_matching_reads(bamfile, sequences, regions)
         for i, counts in enumerate(perfect_match_counts):
-            print(f"{full_span_counts[i]},{','.join(map(str, counts))}")
+            print(f"{full_span_counts[i]},{full_span_all_match_count[i]},{','.join(map(str, counts))}")
     else:
         print(f"No sequences or regions found for gene {gene_key} on contig {contig}", file=sys.stderr)
