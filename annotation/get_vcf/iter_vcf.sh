@@ -7,7 +7,7 @@ user=$(whoami)
 input_file=$1
 
 while read -r sample; do
-    bam_file="/$PWD/run_hifiasm/$sample/merged_bam/alg_asm20_to_ref_with_secondarySeq/$sample.sorted.bam"
+    bam_file="$PWD/run_wasp/$sample/merged_bam/final_asm20_to_ref_with_secondarySeq/$sample.sorted.bam"
     
     if [ -f "$bam_file" ]; then
         outdir="$PWD/geno_analysis/${sample}"
@@ -18,7 +18,7 @@ while read -r sample; do
         count=$(squeue | grep $user | wc -l)
         
         while [ "$count" -gt 9 ]; do
-            sleep 1s
+            sleep 10s
             count=$(squeue | grep $user | wc -l)
         done
     else

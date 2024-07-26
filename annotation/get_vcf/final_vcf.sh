@@ -86,6 +86,7 @@ function process_vcf {
         # The sample doesn't need hemizygous adjustment
         "${vcfanno}" "${anno_config_file}" "${of}.vcf.gz" > "${outd}/annotated_vcfs/${sample}/${sample}_annotated.vcf"
     fi
+    gzip "${outd}/annotated_vcfs/${sample}/${sample}_annotated.vcf"
 }
 
 # Main script
@@ -95,8 +96,8 @@ mkdir -p "${outd}"
 
 
 sample="$1"
-bam_file="/$PWD/run_hifiasm/$sample/merged_bam/alg_asm20_to_ref_with_secondarySeq/$sample.sorted.bam"
-reffn="/home/zmvanw01/git_repos/immune_receptor_genomics/231229/reference.fasta"
+bam_file="$PWD/run_wasp/$sample/merged_bam/final_asm20_to_ref_with_secondarySeq/$sample.sorted.bam"
+reffn="/home/zmvanw01/git_repos/immune_receptor_genomics/current/reference.fasta"
 num_threads="11"
 SV_regions_entire="/home/zmvanw01/git_repos/wasp/annotation/KL_SV_regions_entire.bed"
 SV_regions_1bp="/home/zmvanw01/git_repos/wasp/annotation/SV_regions_1bp.bed"
@@ -105,10 +106,10 @@ anno_config_file="/home/zmvanw01/git_repos/wasp/annotation/config.toml"
 vcfanno="vcfanno"
 
 samtools addreplacerg -r ID:"${sample}" -r SM:"${sample}" \
-    -o "${scratch}/run_hifiasm/$sample/${sample}.editRG.bam" "${bam_file}"
-samtools index "${scratch}/run_hifiasm/$sample/${sample}.editRG.bam"
+    -o "${scratch}/run_wasp/$sample/${sample}.editRG.bam" "${bam_file}"
+samtools index "${scratch}/run_wasp/$sample/${sample}.editRG.bam"
 
-bam_path="${scratch}/run_hifiasm/$sample/${sample}.editRG.bam"
+bam_path="${scratch}/run_wasp/$sample/${sample}.editRG.bam"
 
 genotype_SV_regions "$bam_path" "$SV_regions_1bp" "$outd" "$sample"
 process_vcf "$bam_path" "$sample" "$outd" "$reffn" "$num_threads" "$SV_regions_entire" "$changeg" "$anno_config_file" "$vcfanno"
