@@ -39,23 +39,23 @@ function align_with_minimap2_asm20 {
 
 function align_and_process {
     sample=$1
-    dir=$PWD/run_hifiasm
-    outdir=${dir}/${sample}/merged_bam/final_asm20_to_ref_with_secondarySeq
+    dir=$2
+    outdir=${dir}/merged_bam/final_asm20_to_ref_with_secondarySeq
     mkdir -p $outdir
-    minimap2 -x asm20 --secondary=yes -t ${threads} -L -a ${reffn} ${dir}/${sample}/merged_bam/merged_all_reads.rmdup.fasta > ${outdir}/${sample}.sam
+    minimap2 -x asm20 --secondary=yes -t ${threads} -L -a ${reffn} ${dir}/merged_bam/merged_all_reads.rmdup.fasta > ${outdir}/${sample}.sam
     samtools view -Sbh ${outdir}/${sample}.sam > ${outdir}/${sample}.bam
     samtools sort -@ 10 ${outdir}/${sample}.bam -o ${outdir}/${sample}.sorted.bam
     samtools index ${outdir}/${sample}.sorted.bam
 }
 function merge_and_rmdup {
     sample=$1
-    dir=$PWD/run_hifiasm
-    mkdir -p ${dir}/${sample}/merged_bam
-    samtools merge -f ${dir}/${sample}/merged_bam/merged.bam ${dir}/${sample}/break_at_soft_clip/1_asm20_hifi_asm_to_ref.sorted.bam ${dir}/${sample}/break_at_soft_clip/2_asm20_hifi_asm_to_ref.sorted.bam
-    samtools sort -@ ${threads} ${dir}/${sample}/merged_bam/merged.bam -o ${dir}/${sample}/merged_bam/merged.sorted.bam
-    samtools index ${dir}/${sample}/merged_bam/merged.sorted.bam
-    samtools fasta --reference ${reffn} ${dir}/${sample}/merged_bam/merged.sorted.bam > ${dir}/${sample}/merged_bam/merged_all_reads.fasta
-    seqkit rmdup --by-seq ${dir}/${sample}/merged_bam/merged_all_reads.fasta -o ${dir}/${sample}/merged_bam/merged_all_reads.rmdup.fasta
+    dir=$2
+    mkdir -p ${dir}/merged_bam
+    samtools merge -f ${dir}/merged_bam/merged.bam ${dir}/break_at_soft_clip/1_asm20_hifi_asm_to_ref.sorted.bam ${dir}/break_at_soft_clip/2_asm20_hifi_asm_to_ref.sorted.bam
+    samtools sort -@ ${threads} ${dir}/merged_bam/merged.bam -o ${dir}/merged_bam/merged.sorted.bam
+    samtools index ${dir}/merged_bam/merged.sorted.bam
+    samtools fasta --reference ${reffn} ${dir}/merged_bam/merged.sorted.bam > ${dir}/merged_bam/merged_all_reads.fasta
+    seqkit rmdup --by-seq ${dir}/merged_bam/merged_all_reads.fasta -o ${dir}/merged_bam/merged_all_reads.rmdup.fasta
 }
 
 
@@ -134,7 +134,7 @@ do
 
     if [ ! -s ${outdir}/break_at_soft_clip/${i}_hifi_asm_to_ref.sorted.bam ]
     then
-        python /usr/local/bin/extract_soft_clip_seq.py \
+        python /opt/wasp/scripts/hifi-mapping/extract_soft_clip_seq.py \
         ${bam} > ${outdir}/break_at_soft_clip/${i}_hifi_asm.fasta
 
         samtools faidx ${outdir}/break_at_soft_clip/${i}_hifi_asm.fasta
@@ -155,6 +155,6 @@ do
         ${threads}
     fi
 done
-merge_and_rmdup $sample
-align_and_process $sample
+merge_and_rmdup $sample $outdir
+align_and_process $sample $outdir
 

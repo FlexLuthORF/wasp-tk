@@ -64,7 +64,7 @@ function process_vcf {
     if grep -q -P "\t0/1$" "$sample_sv_results"; then
         # The sample has at least one 0/1 genotype, so it needs adjustment
         output_vcf="${sample_outd}/change_to_hemi/${sample}_hemi.vcf"
-        python "${changeg}" "${of}.vcf" "$sample_sv_results" \
+        /opt/wasp/conda/bin/python "${changeg}" "${of}.vcf" "$sample_sv_results" \
             "${SV_regions_entire}" "${sample}" > "${output_vcf}"
         
     # THIS FIXES A WEIRD CYVCF2 ISSUE WE ARE HAVING
@@ -96,13 +96,13 @@ mkdir -p "${outd}"
 
 
 sample="$1"
-bam_file="$PWD/run_wasp/$sample/merged_bam/final_asm20_to_ref_with_secondarySeq/$sample.sorted.bam"
-reffn="/home/zmvanw01/git_repos/immune_receptor_genomics/current/reference.fasta"
-num_threads="11"
-SV_regions_entire="/home/zmvanw01/git_repos/wasp/annotation/KL_SV_regions_entire.bed"
-SV_regions_1bp="/home/zmvanw01/git_repos/wasp/annotation/SV_regions_1bp.bed"
-changeg="/home/zmvanw01/git_repos/wasp/annotation/get_vcf/vcf_processing.py"
-anno_config_file="/home/zmvanw01/git_repos/wasp/annotation/config.toml"
+bam_file="$2"
+reffn="$3"
+num_threads="$4"
+SV_regions_entire="/opt/wasp/scripts/annotation/KL_SV_regions_entire.bed"
+SV_regions_1bp="/opt/wasp/scripts/annotation/SV_regions_1bp.bed"
+changeg="/opt/wasp/scripts/annotation/get_vcf/vcf_processing.py"
+anno_config_file="/opt/wasp/scripts/annotation/config.toml"
 vcfanno="vcfanno"
 
 samtools addreplacerg -r ID:"${sample}" -r SM:"${sample}" \
