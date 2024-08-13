@@ -28,4 +28,4 @@ mkdir -p $outdir
 bash /opt/wasp/scripts/annotation/create_fofn_from_asm.sh "${outdir}" "${sample}" "${ccs}" "${asm}"
 fofn="${outdir}/fofn.tsv"
 /opt/wasp/conda/bin/python /opt/wasp/scripts/annotation/process_alleles.py ${sample} ${asm} ${reference_fasta} ${bed_dir} ${allele_ref_dir} ${outdir}
-bash /opt/wasp/scripts/annotation/read-support/get_read_support_VDJs.sh ${fofn} ${reference_fasta} ${bed_dir}/IG_loci.bed ${threads} ${outdir} ${minimap_option}
+bash /opt/wasp/scripts/annotation/read-support/get_read_support_VDJs.sh ${fofn} ${reference_fasta} ${bed_dir}/IG_loci.bed ${threads} ${outdir} ${ccs_minimap_option}

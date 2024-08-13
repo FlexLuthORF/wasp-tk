@@ -1,14 +1,20 @@
 #!/bin/bash
 set -e -x
 
-# Function to genotype SV regions
+# Define the main directory for VCF files
+scratch="$PWD"
+outd="$scratch/run_wasp"
+
 function genotype_SV_regions {
     local bam_path="$1"
     local SV_regions_1bp="$2"
-    local outd="$3"
-    local sample="$4"
+    local sample="$3"
 
-    sample_sv_results="${outd}/${sample}_sv_genotype_results.txt"
+    # Ensure the directory exists
+    local sample_vcf_dir="${outd}/${sample}/vcfs"
+    mkdir -p "$sample_vcf_dir"
+
+    local sample_sv_results="${sample_vcf_dir}/${sample}_sv_genotype_results.txt"
 
     while read -r sv_region; do
         sv_name=$(echo "$sv_region" | cut -f4)
@@ -34,67 +40,47 @@ function genotype_SV_regions {
 function process_vcf {
     local bam_file="$1"
     local sample="$2"
-    local outd="$3"
-    local reffn="$4"
-    local num_threads="$5"
-    local SV_regions_entire="$6"
-    local changeg="$7"
-    local anno_config_file="$8"
-    local vcfanno="$9"
+    local reffn="$3"
+    local num_threads="$4"
+    local SV_regions_entire="$5"
+    local changeg="$6"
+    local anno_config_file="$7"
+    local vcfanno="$8"
+    local bed_dir="$9"
+    
+    local sample_vcf_dir="${outd}/${sample}/vcfs"
+    mkdir -p "$sample_vcf_dir"
 
-    sample_outd="${outd}/${sample}"
-    mkdir -p "${sample_outd}"
+    local of="${sample_vcf_dir}/${sample}"
+    bcftools mpileup -B -a QS -Ou -f "${reffn}" -R ${bed_dir}/IG_loci.bed --threads "${num_threads}" "$bam_file" | \
+    bcftools call -m -Oz -o "${of}.vcf.gz"
 
-    of="${sample_outd}/${sample}"
-    bcftools mpileup -B -a QS -Ou -f "${reffn}" \
-        --threads "${num_threads}" "$bam_file" | \
-        bcftools call -m -Oz -o "${of}.vcf.gz"
     bcftools index "${of}.vcf.gz"
 
-    bcftools mpileup -B -a QS -Ou -f "${reffn}" \
-        --threads "${num_threads}" "$bam_file" | \
-        bcftools call -m -Ov -o "${of}.vcf"
-
-    mkdir -p "${sample_outd}/change_to_hemi"
-    mkdir -p "${outd}/annotated_vcfs/${sample}"
-
-    sample_sv_results="${outd}/${sample}_sv_genotype_results.txt"
-
-    # Check if the sample needs hemizygous adjustment
-    if grep -q -P "\t0/1$" "$sample_sv_results"; then
-        # The sample has at least one 0/1 genotype, so it needs adjustment
-        output_vcf="${sample_outd}/change_to_hemi/${sample}_hemi.vcf"
-        /opt/wasp/conda/bin/python "${changeg}" "${of}.vcf" "$sample_sv_results" \
+    if grep -q -P "\t0/1$" "${sample_vcf_dir}/${sample}_sv_genotype_results.txt"; then
+        local output_vcf="${sample_vcf_dir}/${sample}_hemi.vcf"
+        /opt/wasp/conda/bin/python "${changeg}" "${of}.vcf" "${sample_vcf_dir}/${sample}_sv_genotype_results.txt" \
             "${SV_regions_entire}" "${sample}" > "${output_vcf}"
-        
-    # THIS FIXES A WEIRD CYVCF2 ISSUE WE ARE HAVING
-    # Remove lines at the start of the file that don't start with "##"
-        header_end=$(grep -n '^#CHROM' "$output_vcf" | cut -d ':' -f 1)
+
+        # Fixing header issues for VCF
+        local header_end=$(grep -n '^#CHROM' "$output_vcf" | cut -d ':' -f 1)
         sed -i "1,${header_end}s/^[^#].*//g" "$output_vcf"
-        # Add the required header lines at the beginning of the file
         sed -i '1i##fileformat=VCFv4.2' $output_vcf
         sed -i '2i##FILTER=<ID=PASS,Description="All filters passed">' $output_vcf
         sed -i '3i##bcftoolsVersion=1.19+htslib-1.19.1' $output_vcf
-        # Remove empty lines from the file
         sed -i '/^$/d' "$output_vcf"
 
         bgzip -c "${output_vcf}" > "${output_vcf}.gz"
         bcftools index "${output_vcf}.gz"
-        "${vcfanno}" "${anno_config_file}" "${output_vcf}.gz" \
-            > "${outd}/annotated_vcfs/${sample}/${sample}_annotated.vcf"
+        "${vcfanno}" "${anno_config_file}" "${output_vcf}.gz" > "${sample_vcf_dir}/${sample}_annotated.vcf"
+        gzip "${sample_vcf_dir}/${sample}_annotated.vcf"
     else
-        # The sample doesn't need hemizygous adjustment
-        "${vcfanno}" "${anno_config_file}" "${of}.vcf.gz" > "${outd}/annotated_vcfs/${sample}/${sample}_annotated.vcf"
+        "${vcfanno}" "${anno_config_file}" "${of}.vcf.gz" > "${sample_vcf_dir}/${sample}_annotated.vcf"
+        gzip "${sample_vcf_dir}/${sample}_annotated.vcf"
     fi
-    gzip "${outd}/annotated_vcfs/${sample}/${sample}_annotated.vcf"
 }
 
-# Main script
-scratch="$PWD"
-outd="${scratch}/geno_analysis/per_samp"
-mkdir -p "${outd}"
-
-
+# Inputs from the user or script
 sample="$1"
 bam_file="$2"
 reffn="$3"
@@ -104,12 +90,12 @@ SV_regions_1bp="/opt/wasp/scripts/annotation/SV_regions_1bp.bed"
 changeg="/opt/wasp/scripts/annotation/get_vcf/vcf_processing.py"
 anno_config_file="/opt/wasp/scripts/annotation/config.toml"
 vcfanno="vcfanno"
+bed_dir=$5
 
-samtools addreplacerg -r ID:"${sample}" -r SM:"${sample}" \
-    -o "${scratch}/run_wasp/$sample/${sample}.editRG.bam" "${bam_file}"
-samtools index "${scratch}/run_wasp/$sample/${sample}.editRG.bam"
+# Add and index new read group
+samtools addreplacerg -r ID:"${sample}" -r SM:"${sample}" -o "${outd}/$sample/${sample}.editRG.bam" "${bam_file}"
+samtools index "${outd}/$sample/${sample}.editRG.bam"
 
-bam_path="${scratch}/run_wasp/$sample/${sample}.editRG.bam"
-
-genotype_SV_regions "$bam_path" "$SV_regions_1bp" "$outd" "$sample"
-process_vcf "$bam_path" "$sample" "$outd" "$reffn" "$num_threads" "$SV_regions_entire" "$changeg" "$anno_config_file" "$vcfanno"
+# Run functions
+genotype_SV_regions "${outd}/$sample/${sample}.editRG.bam" "$SV_regions_1bp" "$sample"
+process_vcf "${outd}/$sample/${sample}.editRG.bam" "$sample" "$reffn" "$num_threads" "$SV_regions_entire" "$changeg" "$anno_config_file" "$vcfanno" "$bed_dir"
