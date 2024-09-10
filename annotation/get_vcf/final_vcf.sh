@@ -59,6 +59,7 @@ function process_vcf {
 
     if grep -q -P "\t0/1$" "${sample_vcf_dir}/${sample}_sv_genotype_results.txt"; then
         local output_vcf="${sample_vcf_dir}/${sample}_hemi.vcf"
+        
         /opt/wasp/conda/bin/python "${changeg}" "${of}.vcf" "${sample_vcf_dir}/${sample}_sv_genotype_results.txt" \
             "${SV_regions_entire}" "${sample}" > "${output_vcf}"
 

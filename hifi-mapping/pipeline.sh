@@ -78,7 +78,7 @@ function merge_and_rmdup {
 
 if [ ! -s ${outdir}/reads.fasta.fai ]
 then
-    samtools view ${ccs} | awk '{ print ">"$1"\n"$10 }' > ${outdir}/reads.fasta
+   # samtools view ${ccs} | awk '{ print ">"$1"\n"$10 }' > ${outdir}/reads.fasta
     samtools faidx ${outdir}/reads.fasta
 fi
 

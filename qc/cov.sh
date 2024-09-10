@@ -24,7 +24,7 @@ function map_ccs_to_ref {
     dir=$scratch/ccs_cov
     outdir=${scratch}/run_wasp/${sample}/ccs_cov
     mkdir -p $outdir
-    samtools view ${ccs} | awk '{ print ">"$1"\n"$10 }' > ${outdir}/reads.fasta
+    #samtools view ${ccs} | awk '{ print ">"$1"\n"$10 }' > ${outdir}/reads.fasta
     samtools faidx ${outdir}/reads.fasta
     minimap2 -x map-hifi --secondary=no -t "${threads}" -L -a ${reffn} ${outdir}/reads.fasta > ${outdir}/${sample}.sam
     samtools view -Sbh ${outdir}/${sample}.sam > ${outdir}/${sample}.bam
