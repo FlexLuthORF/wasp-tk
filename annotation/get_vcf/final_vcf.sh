@@ -57,28 +57,31 @@ function process_vcf {
 
     bcftools index "${of}.vcf.gz"
 
-    if grep -q -P "\t0/1$" "${sample_vcf_dir}/${sample}_sv_genotype_results.txt"; then
-        local output_vcf="${sample_vcf_dir}/${sample}_hemi.vcf"
+    # if grep -q -P "\t0/1$" "${sample_vcf_dir}/${sample}_sv_genotype_results.txt"; then
+    #     local output_vcf="${sample_vcf_dir}/${sample}_hemi.vcf"
         
-        /opt/wasp/conda/bin/python "${changeg}" "${of}.vcf" "${sample_vcf_dir}/${sample}_sv_genotype_results.txt" \
-            "${SV_regions_entire}" "${sample}" > "${output_vcf}"
+    #     /opt/wasp/conda/bin/python "${changeg}" "${of}.vcf" "${sample_vcf_dir}/${sample}_sv_genotype_results.txt" \
+    #         "${SV_regions_entire}" "${sample}" > "${output_vcf}"
 
-        # Fixing header issues for VCF
-        local header_end=$(grep -n '^#CHROM' "$output_vcf" | cut -d ':' -f 1)
-        sed -i "1,${header_end}s/^[^#].*//g" "$output_vcf"
-        sed -i '1i##fileformat=VCFv4.2' $output_vcf
-        sed -i '2i##FILTER=<ID=PASS,Description="All filters passed">' $output_vcf
-        sed -i '3i##bcftoolsVersion=1.19+htslib-1.19.1' $output_vcf
-        sed -i '/^$/d' "$output_vcf"
+    #     # Fixing header issues for VCF
+    #     local header_end=$(grep -n '^#CHROM' "$output_vcf" | cut -d ':' -f 1)
+    #     sed -i "1,${header_end}s/^[^#].*//g" "$output_vcf"
+    #     sed -i '1i##fileformat=VCFv4.2' $output_vcf
+    #     sed -i '2i##FILTER=<ID=PASS,Description="All filters passed">' $output_vcf
+    #     sed -i '3i##bcftoolsVersion=1.19+htslib-1.19.1' $output_vcf
+    #     sed -i '/^$/d' "$output_vcf"
 
-        bgzip -c "${output_vcf}" > "${output_vcf}.gz"
-        bcftools index "${output_vcf}.gz"
-        "${vcfanno}" "${anno_config_file}" "${output_vcf}.gz" > "${sample_vcf_dir}/${sample}_annotated.vcf"
-        gzip "${sample_vcf_dir}/${sample}_annotated.vcf"
-    else
-        "${vcfanno}" "${anno_config_file}" "${of}.vcf.gz" > "${sample_vcf_dir}/${sample}_annotated.vcf"
-        gzip "${sample_vcf_dir}/${sample}_annotated.vcf"
-    fi
+    #     bgzip -c "${output_vcf}" > "${output_vcf}.gz"
+    #     bcftools index "${output_vcf}.gz"
+    #     "${vcfanno}" "${anno_config_file}" "${output_vcf}.gz" > "${sample_vcf_dir}/${sample}_annotated.vcf"
+    #     bgzip "${sample_vcf_dir}/${sample}_annotated.vcf"
+    # else
+    #     "${vcfanno}" "${anno_config_file}" "${of}.vcf.gz" > "${sample_vcf_dir}/${sample}_annotated.vcf"
+    #     bgzip "${sample_vcf_dir}/${sample}_annotated.vcf"
+    # fi
+    "${vcfanno}" "${anno_config_file}" "${of}.vcf.gz" > "${sample_vcf_dir}/${sample}_annotated.vcf"
+    bgzip "${sample_vcf_dir}/${sample}_annotated.vcf"
+    bcftools index "${sample_vcf_dir}/${sample}_annotated.vcf"
 }
 
 # Inputs from the user or script

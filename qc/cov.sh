@@ -21,14 +21,15 @@ function run_get_ccs_cov {
     #bamtocov --regions ${refbed} --report ${outd}/$sample/${sample}_stats_pers-ref.tsv ${pers_bam_path} > ${outd}/$sample/${sample}_cov-cov_pers-ref.bed
 }
 function map_ccs_to_ref {
-    dir=$scratch/ccs_cov
+    #dir=$scratch/ccs_cov
+    readspath=${scratch}/run_wasp/${sample}/reads.fasta
     outdir=${scratch}/run_wasp/${sample}/ccs_cov
     mkdir -p $outdir
     #samtools view ${ccs} | awk '{ print ">"$1"\n"$10 }' > ${outdir}/reads.fasta
-    samtools faidx ${outdir}/reads.fasta
-    minimap2 -x map-hifi --secondary=no -t "${threads}" -L -a ${reffn} ${outdir}/reads.fasta > ${outdir}/${sample}.sam
+    samtools faidx ${readspath}
+    minimap2 -x map-hifi --secondary=no -t "${threads}" -L -a ${reffn} ${readspath} > ${outdir}/${sample}.sam
     samtools view -Sbh ${outdir}/${sample}.sam > ${outdir}/${sample}.bam
-    samtools sort -@ 12 ${outdir}/${sample}.bam -o ${outdir}/ccs_to_ref.sorted.bam
+    samtools sort -@ "${threads}" ${outdir}/${sample}.bam -o ${outdir}/ccs_to_ref.sorted.bam
     samtools index ${outdir}/ccs_to_ref.sorted.bam
 }
 function map_ccs_to_pers_ref {

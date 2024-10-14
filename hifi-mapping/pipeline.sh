@@ -7,6 +7,7 @@ threads=$3
 sample=$4
 reffn=$5
 minimap_option=$6
+bed_dir=$7
 
 function align_with_minimap2 {
     fasta=$1
@@ -46,8 +47,12 @@ function align_and_process {
     mkdir -p $outdir
     minimap2 -x asm20 --secondary=yes -t ${threads} -L -a ${reffn} ${dir}/merged_bam/merged_all_reads.rmdup.fasta > ${outdir}/${sample}.sam
     samtools view -Sbh ${outdir}/${sample}.sam > ${outdir}/${sample}.bam
-    samtools sort -@ 10 ${outdir}/${sample}.bam -o ${outdir}/${sample}.sorted.bam
+    samtools sort -@ ${threads} ${outdir}/${sample}.bam -o ${outdir}/${sample}.tmp.sorted.bam
+    samtools index ${outdir}/${sample}.tmp.sorted.bam
+    bedtools intersect -abam ${outdir}/${sample}.tmp.sorted.bam -b ${bed_dir}/IG_loci.bed > ${outdir}/${sample}.sorted.bam
     samtools index ${outdir}/${sample}.sorted.bam
+    samtools view ${outdir}/${sample}.sorted.bam | awk '{ print ">"$1"\n"$10 }' > ${outdir}/contigs.fasta
+
 }
 function merge_and_rmdup {
     sample=$1
