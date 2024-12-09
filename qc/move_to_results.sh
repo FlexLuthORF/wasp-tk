@@ -4,7 +4,8 @@ sample=$1
 orig_outdir=$2
 outdir=$PWD/results/${sample}
 
-mkdir ${outdir}/reads ${outdir}/alignments ${outdir}/variants ${outdir}/alleles
+mkdir -p ${outdir}
+mkdir -p ${outdir}/reads ${outdir}/alignments ${outdir}/variants ${outdir}/alleles ${outdir}/stats
 
 # Moving and creating symlinks
 mv ${orig_outdir}/reads.fasta ${outdir}/reads/ccs-reads.fasta
@@ -37,10 +38,20 @@ loci_list=("IGH" "IGHC" "IGK" "IGL" "TRA" "TRB" "TRD" "TRG")
 for loci in "${loci_list[@]}"; do
     mkdir -p "${outdir}/alleles/${loci}"
     mv "${orig_outdir}/read_support/${sample}/imported_genes/${loci}/${sample}_make_gene_file_imported_with_read_support.csv" \
-       "${outdir}/alleles/${loci}/${sample}_${loci}_annotated-alles-with-read-support.csv"
-    ln -s "${outdir}/alleles/${loci}/${sample}_${loci}_annotated-alles-with-read-support.csv" \
+       "${outdir}/alleles/${sample}_${loci}_annotated-alles-with-read-support.csv"
+    ln -s "${outdir}/alleles/${sample}_${loci}_annotated-alles-with-read-support.csv" \
           "${orig_outdir}/read_support/${sample}/imported_genes/${loci}/${sample}_make_gene_file_imported_with_read_support.csv"
 done
 
 mv ${orig_outdir}/vcfs/${sample}_annotated.vcf.gz ${outdir}/variants/${sample}_annotated.vcf.gz
 ln -s ${outdir}/variants/${sample}_annotated.vcf.gz ${orig_outdir}/vcfs/${sample}_annotated.vcf.gz
+
+mv ${orig_outdir}/ccs_cov/average_chrom_coverage.tsv ${outdir}/stats/${sample}_personal-ref-based_depth.tsv
+ln -s ${outdir}/stats/${sample}_personal-ref-based_depth.tsv ${orig_outdir}/ccs_cov/average_chrom_coverage.tsv
+
+mv ${orig_outdir}/merged_bam/final_asm20_to_ref_with_secondarySeq/${sample}.asm.stats ${outdir}/stats/${sample}.asm.stats
+ln -s ${outdir}/stats/${sample}.asm.stats ${orig_outdir}/merged_bam/final_asm20_to_ref_with_secondarySeq/${sample}.asm.stats
+
+mv ${orig_outdir}/merged_bam/final_asm20_to_ref_with_secondarySeq/${sample}.asm-to-ref.flagstats ${outdir}/stats/${sample}.asm-to-ref.flagstats
+ln -s ${outdir}/stats/${sample}.asm-to-ref.flagstats ${orig_outdir}/merged_bam/final_asm20_to_ref_with_secondarySeq/${sample}.asm-to-ref.flagstats
+

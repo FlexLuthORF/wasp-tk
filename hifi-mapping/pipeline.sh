@@ -70,12 +70,16 @@ function merge_and_rmdup {
     samtools merge -f ${outdir}/merged.bam ${dir}/break_at_soft_clip/1_asm20_hifi_asm_to_ref.sorted.bam ${dir}/break_at_soft_clip/2_asm20_hifi_asm_to_ref.sorted.bam
     
     # Sort and index the merged file
-    samtools sort -@ ${threads} ${outdir}/merged.bam -o ${outdir}/${sample}.sorted.bam
-    samtools index ${outdir}/${sample}.sorted.bam
+    samtools sort -@ ${threads} ${outdir}/merged.bam -o ${outdir}/${sample}.tmp.sorted.bam
+    samtools index ${outdir}/${sample}.tmp.sorted.bam
     
     # Remove duplicates and index the final BAM file
-    samtools markdup -r ${outdir}/${sample}.sorted.bam ${outdir}/${sample}.rmdup.bam
+    samtools markdup -r ${outdir}/${sample}.tmp.sorted.bam ${outdir}/${sample}.rmdup.bam
     samtools index ${outdir}/${sample}.rmdup.bam
+    
+    bedtools intersect -abam ${outdir}/${sample}.rmdup.bam -b ${bed_dir}/IG_loci.bed > ${outdir}/${sample}.sorted.bam
+    samtools index ${outdir}/${sample}.sorted.bam
+    samtools view ${outdir}/${sample}.sorted.bam | awk '{ print ">"$1"\n"$10 }' > ${outdir}/contigs.fasta
 }
 
 

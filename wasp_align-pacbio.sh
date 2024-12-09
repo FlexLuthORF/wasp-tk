@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Check arguments
-if [ "$#" -ne 3 ]; then
-    echo "Usage: $0 path/to/config.cfg sampleID path/to/ccs.bam"
-    exit 1
-fi
-
 # Source the config file
 CONFIG_FILE=$1
 if [ -f "$CONFIG_FILE" ]; then
@@ -14,14 +8,17 @@ else
     echo "Config file not found!"
     exit 1
 fi
-
-
 sample=$2
 ccs=$3
 container=$4
 
 outdir=$PWD/run_wasp/${sample}
 mkdir -p $outdir
+if [ -d "$PWD/statistics" ]; then
+    stats = true  
+else
+    stats = false
+fi
 
 
 if [[ "${ccs}" == *.bam ]]; then
@@ -32,6 +29,7 @@ fi
 reads="${outdir}/reads.fasta"
 # Processing steps
 #singularity exec ${container}
+cp $CONFIG_FILE $outdir
 bash /opt/wasp/scripts/annotation/create_fofn_from_asm.sh "${outdir}" "${sample}" "${ccs}"
 fofn="${outdir}/fofn.tsv"
 bash /opt/wasp/scripts/qc/cov.sh "${sample}" "${ccs}" "${reference_fasta}" "${bed_dir}/IG_loci.bed" "${threads}"
@@ -44,3 +42,5 @@ bash /opt/wasp/scripts/annotation/read-support/get_read_support_VDJs.sh ${fofn} 
 bash /opt/wasp/scripts/annotation/get_vcf/final_vcf.sh ${sample} ${outdir}/merged_bam/final_asm20_to_ref_with_secondarySeq/${sample}.sorted.bam ${reference_fasta} ${threads} ${bed_dir}
 bash /opt/wasp/scripts/qc/perscov.sh "${sample}" "${outdir}/read_support/${sample}/ccs_to_pers/output.sorted.bam" "${outdir}/merged_bam/final_asm20_to_ref_with_secondarySeq/${sample}.sorted.bam" "${bed_dir}/IG_loci.bed" "${outdir}"
 bash /opt/wasp/scripts/qc/move_to_results.sh "${sample}" "${outdir}"
+if stats == true; then
+    bash /opt/wasp/scripts/qc/move_statistics_to_results.sh "${sample}" "${outdir}"

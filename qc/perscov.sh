@@ -17,7 +17,7 @@ outdir="$5"
 bamtocov --wig 0 -o ${outdir}/ccs_cov/coverage_output.bed "$ccs_reads_bam"
 
 # Step 2: Extract contig mappings from the other BAM and convert to BED format
-samtools view "$contigs_to_ref_bam" | awk 'BEGIN {OFS="\t"} {print $3, $4, $4+length($10), $1}' > contig_to_chrom_coords.bed
+samtools view "$contigs_to_ref_bam" | awk 'BEGIN {OFS="\t"} {print $3, $4, $4+length($10), $1}' > ${outdir}/ccs_cov/contig_to_chrom_coords.bed
 
 # Step 3: Filter contigs that overlap with IG loci using bedtools
 bedtools intersect -a ${outdir}/ccs_cov/contig_to_chrom_coords.bed -b "$ig_loci_bed" -wo > ${outdir}/ccs_cov/filtered_contigs.bed

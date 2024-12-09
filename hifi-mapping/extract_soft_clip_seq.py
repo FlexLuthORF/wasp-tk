@@ -10,7 +10,7 @@ def is_soft_cipped(contig):
     is_sc = False
     if contig.query_alignment_start > 1000:
         is_sc = True
-    if (contig.query_length - contig.query_alignment_end) > 1000:
+    if (contig.query_length - contig.query_alignment_end) > 10000:
         is_sc = True
     return is_sc
     
