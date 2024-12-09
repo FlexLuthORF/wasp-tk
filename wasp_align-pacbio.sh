@@ -30,6 +30,7 @@ reads="${outdir}/reads.fasta"
 # Processing steps
 #singularity exec ${container}
 cp $CONFIG_FILE $outdir
+cp /opt/wasp/scripts/qc/container.yml $outdir
 bash /opt/wasp/scripts/annotation/create_fofn_from_asm.sh "${outdir}" "${sample}" "${ccs}"
 fofn="${outdir}/fofn.tsv"
 bash /opt/wasp/scripts/qc/cov.sh "${sample}" "${ccs}" "${reference_fasta}" "${bed_dir}/IG_loci.bed" "${threads}"
