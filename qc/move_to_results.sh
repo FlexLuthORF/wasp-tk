@@ -36,7 +36,7 @@ ln -s ${outdir}/alignments/${sample}_ccs-to-personal-reference.sorted.bam.bai ${
 loci_list=("IGH" "IGHC" "IGK" "IGL" "TRA" "TRB" "TRD" "TRG")
 
 for loci in "${loci_list[@]}"; do
-    mkdir -p "${outdir}/alleles/${loci}"
+    #mkdir -p "${outdir}/alleles/${loci}"
     mv "${orig_outdir}/read_support/${sample}/imported_genes/${loci}/${sample}_make_gene_file_imported_with_read_support.csv" \
        "${outdir}/alleles/${sample}_${loci}_annotated-alles-with-read-support.csv"
     ln -s "${outdir}/alleles/${sample}_${loci}_annotated-alles-with-read-support.csv" \
@@ -55,3 +55,8 @@ ln -s ${outdir}/stats/${sample}.asm.stats ${orig_outdir}/merged_bam/final_asm20_
 mv ${orig_outdir}/merged_bam/final_asm20_to_ref_with_secondarySeq/${sample}.asm-to-ref.flagstats ${outdir}/stats/${sample}.asm-to-ref.flagstats
 ln -s ${outdir}/stats/${sample}.asm-to-ref.flagstats ${orig_outdir}/merged_bam/final_asm20_to_ref_with_secondarySeq/${sample}.asm-to-ref.flagstats
 
+mv ${orig_outdir}/ccs_cov/${sample}_stats.tsv ${outdir}/stats/${sample}_ccs_to_ref-based_depth.tsv
+ln -s ${outdir}/stats/${sample}_ccs_to_ref-based_depth.tsv ${orig_outdir}/ccs_cov/${sample}_stats.tsv
+
+mv ${orig_outdir}/${sample}_readLengthHistogram.png ${outdir}/stats/${sample}_readLengthHistogram.png
+ln -s ${outdir}/stats/${sample}_readLengthHistogram.png ${orig_outdir}/${sample}_readLengthHistogram.png

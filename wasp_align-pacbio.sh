@@ -15,9 +15,9 @@ container=$4
 outdir=$PWD/run_wasp/${sample}
 mkdir -p $outdir
 if [ -d "$PWD/statistics" ]; then
-    stats = true  
+    stats=true  
 else
-    stats = false
+    stats=false
 fi
 
 
@@ -43,5 +43,7 @@ bash /opt/wasp/scripts/annotation/read-support/get_read_support_VDJs.sh ${fofn} 
 bash /opt/wasp/scripts/annotation/get_vcf/final_vcf.sh ${sample} ${outdir}/merged_bam/final_asm20_to_ref_with_secondarySeq/${sample}.sorted.bam ${reference_fasta} ${threads} ${bed_dir}
 bash /opt/wasp/scripts/qc/perscov.sh "${sample}" "${outdir}/read_support/${sample}/ccs_to_pers/output.sorted.bam" "${outdir}/merged_bam/final_asm20_to_ref_with_secondarySeq/${sample}.sorted.bam" "${bed_dir}/IG_loci.bed" "${outdir}"
 bash /opt/wasp/scripts/qc/move_to_results.sh "${sample}" "${outdir}"
-if stats == true; then
-    bash /opt/wasp/scripts/qc/move_statistics_to_results.sh "${sample}" "${outdir}"
+/opt/wasp/conda/bin/python /opt/wasp/scripts/qc/plotReadLengths.py ${outdir}/reads.fasta ${outdir}/${sample}_readLengthHistogram.png
+#if [[ $stats == true ]]; then
+ #   bash /opt/wasp/scripts/qc/move_statistics_to_results.sh "${sample}" "${outdir}"
+#fi
