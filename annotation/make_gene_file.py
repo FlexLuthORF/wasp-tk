@@ -111,11 +111,12 @@ class CigarState:
 
 HAPLOTYPE_WARNING = False
 
+
 # Fetch all contigs from the BAM file that cover the specified range
 def fetch_contigs(samfile, chrom, start, end, annotation_ranges, verbose):
     contigs = []
 
-    #if verbose:
+    # if verbose:
     #    breakpoint()
 
     for read in samfile.fetch(chrom, start, end):
@@ -168,14 +169,14 @@ def fetch_contigs(samfile, chrom, start, end, annotation_ranges, verbose):
             if 'h=' in el:
                 haplotype = el.replace('h=', '')        # this is the IGenotyper convention
 
-        if haplotype is None:                           # fudge (temporary?) for IGC T2T
-            if 'hap_1' in name:
+        if haplotype is None:                           # hap1, hap2 is the Wasp convention
+            if 'hap_1' in name or 'hap1' in name:
                 haplotype = '1'
-            elif 'hap_2' in name:
+            elif 'hap_2' in name or 'hap2' in name:
                 haplotype = '2'
 
         if haplotype is None or haplotype not in ['0', '1', '2']:
-            verbose_print(f"{read.qname}: unrecognisable haplotype", verbose)
+            print(f"{read.qname}: unrecognisable haplotype", verbose)
             haplotype = '0'
 
         # assign to annotation fields, handling indels
