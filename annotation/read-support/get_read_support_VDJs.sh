@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e -x
+set -x
 
 reffn=$2
 IG_loci=$3
