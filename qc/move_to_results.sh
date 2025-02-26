@@ -10,6 +10,7 @@ mkdir -p ${outdir}/reads ${outdir}/alignments ${outdir}/variants ${outdir}/allel
 # Moving and creating symlinks
 mv ${orig_outdir}/reads.fasta ${outdir}/reads/ccs-reads.fasta
 ln -s ${outdir}/reads/ccs-reads.fasta ${orig_outdir}/reads.fasta
+gzip ${outdir}/reads/ccs-reads.fasta
 
 mv ${orig_outdir}/merged_bam/final_asm20_to_ref_with_secondarySeq/contigs.fasta ${outdir}/reads/hifiasm_ig-filtered_contigs.fasta
 ln -s ${outdir}/reads/hifiasm_ig-filtered_contigs.fasta ${orig_outdir}/merged_bam/final_asm20_to_ref_with_secondarySeq/contigs.fasta
@@ -29,8 +30,8 @@ ln -s ${outdir}/alignments/${sample}_ccs-to-ref.sorted.bam.bai ${orig_outdir}/cc
 mv ${orig_outdir}/read_support/${sample}/ccs_to_pers/output.sorted.bam ${outdir}/alignments/${sample}_ccs-to-personal-reference.sorted.bam
 ln -s ${outdir}/alignments/${sample}_ccs-to-personal-reference.sorted.bam ${orig_outdir}/read_support/${sample}/ccs_to_pers/output.sorted.bam
 
-mv ${orig_outdir}/read_support/${sample}/ccs_to_pers/output.sorted.bam.bai ${outdir}/alignments/${sample}_ccs-to-personal-reference.sorted.bam.bai
-ln -s ${outdir}/alignments/${sample}_ccs-to-personal-reference.sorted.bam.bai ${orig_outdir}/read_support/${sample}/ccs_to_pers/output.sorted.bam.bai
+#mv ${orig_outdir}/read_support/${sample}/ccs_to_pers/output.sorted.bam.bai ${outdir}/alignments/${sample}_ccs-to-personal-reference.sorted.bam.bai
+#ln -s ${outdir}/alignments/${sample}_ccs-to-personal-reference.sorted.bam.bai ${orig_outdir}/read_support/${sample}/ccs_to_pers/output.sorted.bam.bai
 
 # Loci list
 loci_list=("IGH" "IGHC" "IGK" "IGL" "TRA" "TRB" "TRD" "TRG")
@@ -55,8 +56,15 @@ ln -s ${outdir}/stats/${sample}.asm.stats ${orig_outdir}/merged_bam/final_asm20_
 mv ${orig_outdir}/merged_bam/final_asm20_to_ref_with_secondarySeq/${sample}.asm-to-ref.flagstats ${outdir}/stats/${sample}.asm-to-ref.flagstats
 ln -s ${outdir}/stats/${sample}.asm-to-ref.flagstats ${orig_outdir}/merged_bam/final_asm20_to_ref_with_secondarySeq/${sample}.asm-to-ref.flagstats
 
-mv ${orig_outdir}/ccs_cov/${sample}_stats.tsv ${outdir}/stats/${sample}_ccs_to_ref-based_depth.tsv
-ln -s ${outdir}/stats/${sample}_ccs_to_ref-based_depth.tsv ${orig_outdir}/ccs_cov/${sample}_stats.tsv
+mv ${orig_outdir}/ccs_cov/${sample}.per-base.bed.gz ${outdir}/stats/${sample}_ccs_to_ref-based_per-base-depth.bed.gz
+ln -s ${outdir}/stats/${sample}_ccs_to_ref-based_per-base-depth.bed.gz ${orig_outdir}/ccs_cov/${sample}.per-base.bed.gz
+mv ${orig_outdir}/ccs_cov/${sample}.per-base.bed.gz.csi ${outdir}/stats/${sample}_ccs_to_ref-based_per-base-depth.bed.gz.csi
+ln -s ${outdir}/stats/${sample}_ccs_to_ref-based_per-base-depth.bed.gz.csi ${orig_outdir}/ccs_cov/${sample}.per-base.bed.gz.csi
+
+mv ${orig_outdir}/ccs_cov/${sample}.regions.bed.gz ${outdir}/stats/${sample}_ccs_to_ref-based_regions-depth.bed.gz
+ln -s ${outdir}/stats/${sample}_ccs_to_ref-based_regions-depth.bed.gz ${orig_outdir}/ccs_cov/${sample}.regions.bed.gz
+mv ${orig_outdir}/ccs_cov/${sample}.regions.bed.gz.csi ${outdir}/stats/${sample}_ccs_to_ref-based_regions-depth.bed.gz.csi
+ln -s ${outdir}/stats/${sample}_ccs_to_ref-based_regions-depth.bed.gz.csi ${orig_outdir}/ccs_cov/${sample}.regions.bed.gz.csi
 
 mv ${orig_outdir}/${sample}_readLengthHistogram.png ${outdir}/stats/${sample}_readLengthHistogram.png
 ln -s ${outdir}/stats/${sample}_readLengthHistogram.png ${orig_outdir}/${sample}_readLengthHistogram.png

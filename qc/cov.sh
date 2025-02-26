@@ -16,9 +16,8 @@ function run_get_ccs_cov {
     outd=${scratch}/run_wasp/${sample}/ccs_cov
     bam_path=${scratch}/run_wasp/${sample}/ccs_cov/ccs_to_ref.sorted.bam
     pers_bam_path=${scratch}/run_wasp/${sample}/ccs_cov/ccs_to_pers-ref.sorted.bam
-    #bamtocounts --coords ${refbed} ${bam_path} > ${outd}/${sample}/${sample}_ccs-cov_counts.bed
-    bamtocov --regions ${refbed} --report ${outd}/${sample}_stats.tsv ${bam_path} > ${outd}/${sample}_cov-cov.bed
-    #bamtocov --regions ${refbed} --report ${outd}/$sample/${sample}_stats_pers-ref.tsv ${pers_bam_path} > ${outd}/$sample/${sample}_cov-cov_pers-ref.bed
+    #bamtocov --regions ${refbed} --report ${outd}/${sample}_stats.tsv ${bam_path} > ${outd}/${sample}_cov-cov.bed
+    mosdepth -b ${refbed} -t ${threads} ${outd}/${sample} ${bam_path}
 }
 function map_ccs_to_ref {
     #dir=$scratch/ccs_cov
