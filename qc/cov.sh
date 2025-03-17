@@ -30,8 +30,18 @@ function map_ccs_to_ref {
     samtools view -Sbh ${outdir}/${sample}.sam > ${outdir}/${sample}.bam
     samtools sort -@ "${threads}" ${outdir}/${sample}.bam -o ${outdir}/ccs_to_ref.sorted.bam
     samtools index ${outdir}/ccs_to_ref.sorted.bam
+    samtools flagstats ${outdir}/ccs_to_ref.sorted.bam > ${outdir}/ccs_to_ref-full.flagstats.txt
+    samtools view -L ${refbed} -b ${outdir}/ccs_to_ref.sorted.bam > ${outdir}/ig-filtered_ccs_to_ref.sorted.bam
+    samtools index ${outdir}/ig-filtered_ccs_to_ref.sorted.bam
+    samtools flagstats ${outdir}/ig-filtered_ccs_to_ref.sorted.bam > ${outdir}/ig-filtered_ccs_to_ref.flagstats.txt
+    rm ${outdir}/ig-filtered_ccs_to_ref.sorted.bam
+
+    on_target=$(awk 'NR==1 {print $1}' "${outdir}/ig-filtered_ccs_to_ref.flagstats.txt")
+    full=$(awk 'NR==1 {print $1}' "${outdir}/ccs_to_ref-full.flagstats.txt")
+    percent_on=$(echo "scale=2; (100 * $on_target) / $full" | bc -l)
+    echo "$percent_on" > ${outdir}/percent_on_target.txt
 }
-function map_ccs_to_pers_ref {
+function map_ccs_to_pers_ref {_
     dir=$scratch/ccs_cov
     outdir=${scratch}/run_wasp/${sample}/ccs_cov
     mkdir -p $outdir

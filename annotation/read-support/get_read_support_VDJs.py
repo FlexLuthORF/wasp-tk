@@ -642,7 +642,7 @@ def get_read_support_ighc(fofn, scratch):
             if not os.path.isfile(bam_file + ".bai"):
                 safe_run(["samtools", "index", bam_file])
 
-            gene_type = "IGHC"
+            gene_type = ["IGHC"]
             import_out = os.path.join(base_outd, gene_type, f"{sample}_make_gene_file_imported.csv")
             if not os.path.isfile(import_out):
                 continue
