@@ -25,7 +25,7 @@ def get_sequences_and_regions_from_csv(import_csv, gene_key, contig):
                     seq_start = f'C-EXON_{i}_start'
                     seq_end = f'C-EXON_{i}_end'
                     sequence = row.get(sequence_column, '')
-                    sequence_start_end = (row.get(seq_start, ''), row.get(seq_end, '')) # exon specific start-end tuples
+                    sequence_start_end = (int(float(row.get(seq_start, ''))), int(float(row.get(seq_end, '')))) # exon specific start-end tuples
                     if reverse_comp and sequence:
                         sequence = reverse_complement(sequence)
                     if sequence:  # Only add non-empty sequences
