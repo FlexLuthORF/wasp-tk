@@ -47,8 +47,8 @@ done
 mv ${orig_outdir}/vcfs/${sample}_annotated.vcf.gz ${outdir}/variants/${sample}_annotated.vcf.gz
 ln -s ${outdir}/variants/${sample}_annotated.vcf.gz ${orig_outdir}/vcfs/${sample}_annotated.vcf.gz
 
-mv ${orig_outdir}/ccs_cov/average_chrom_coverage.tsv ${outdir}/stats/${sample}_personal-ref-based_depth.tsv
-ln -s ${outdir}/stats/${sample}_personal-ref-based_depth.tsv ${orig_outdir}/ccs_cov/average_chrom_coverage.tsv
+#mv ${orig_outdir}/ccs_cov/average_chrom_coverage.tsv ${outdir}/stats/${sample}_personal-ref-based_depth.tsv
+#ln -s ${outdir}/stats/${sample}_personal-ref-based_depth.tsv ${orig_outdir}/ccs_cov/average_chrom_coverage.tsv
 
 mv ${orig_outdir}/merged_bam/final_asm20_to_ref_with_secondarySeq/${sample}.asm.stats ${outdir}/stats/${sample}.asm.stats
 ln -s ${outdir}/stats/${sample}.asm.stats ${orig_outdir}/merged_bam/final_asm20_to_ref_with_secondarySeq/${sample}.asm.stats

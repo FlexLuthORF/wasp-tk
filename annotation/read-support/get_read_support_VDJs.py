@@ -59,18 +59,15 @@ def run_map_ccs_to_pers(fofn, scratch, mask_ref, minimap_option, threads):
 
     with open(fofn, 'r') as infile:
         for line in infile:
-            # Each line has 17 columns in the original script
             # sample, asm_bam, chr2_gene, chr2_import, chr22_gene, chr22_import,
             # igh_gene, igh_import, ighc_gene, ighc_import,
             # trb_gene, trb_import, trg_gene, trg_import,
-            # trd_gene, trd_import, tra_gene, tra_import, ccs_bam  (actually 17 columns, but last col is ccs_bam)
+            # trd_gene, trd_import, tra_gene, tra_import, ccs_bam  (
             cols = line.strip().split('\t')
-            if len(cols) < 17:
-                continue  # skip malformed lines
             
             sample     = cols[0]
             asm_bam    = cols[1]
-            ccs_bam    = cols[16]  # The original script references ccs_bam at the end
+            ccs_bam    = cols[18]  # The original script references ccs_bam at the end
 
             print(f"Sample is {sample}")
             print(f"CCS bam is {ccs_bam}")
@@ -167,8 +164,6 @@ def run_append_pos(fofn, scratch):
     with open(fofn, 'r') as infile:
         for line in infile:
             cols = line.strip().split()
-            if len(cols) < 17:
-                continue
             
             sample       = cols[0]
             chr2_gene    = cols[2]
@@ -186,6 +181,7 @@ def run_append_pos(fofn, scratch):
             trd_gene     = cols[14]
             trd_import   = cols[15]
             tra_gene     = cols[16]
+            tra_import   = cols[17]
             # The next columns could be ccs_bam or so, but we only need these for appending.
 
             base_outd = os.path.join(scratch, "read_support", sample, "imported_genes")
@@ -221,17 +217,12 @@ def run_append_pos(fofn, scratch):
                     "import_out": os.path.join(base_outd, "TRD", os.path.basename(trd_import))
                 },
                 "TRA": {
-                    "import_src": tra_gene,  # Actually the script uses tra_gene, tra_import
+                    "import_src": tra_import,  # Actually the script uses tra_gene, tra_import
                     "import_out": os.path.join(base_outd, "TRA", os.path.basename(cols[17]) if len(cols) > 17 else "tra_import.csv")
                 }
             }
 
-            # Adjust the last line to ensure we handle the correct tra_import if present
-            # The original script references tra_gene/tra_import, but let's keep consistent:
-            if len(cols) > 17:
-                tra_import = cols[17]
-                paths["TRA"]["import_src"] = tra_import
-                paths["TRA"]["import_out"] = os.path.join(base_outd, "TRA", os.path.basename(tra_import))
+        
 
             # Make directories and run external append scripts
             os.makedirs(base_outd, exist_ok=True)
@@ -271,7 +262,7 @@ def run_append_pos(fofn, scratch):
                 safe_run([
                     "/opt/wasp/conda/bin/python",
                     "/opt/wasp/scripts/annotation/read-support/append_pos_import_genes.py",
-                    tra_gene, paths["TRA"]["import_src"], paths["TRA"]["import_out"]
+                    tra_gene, tra_import, paths["TRA"]["import_out"]
                 ])
                 safe_run([
                     "/opt/wasp/conda/bin/python",
@@ -389,7 +380,7 @@ def get_read_support_vdj3(fofn, scratch):
                 tmp_file = import_out + "_read_support.tmp"
                 # Write a header to the tmp_file (to match the script's initial CSV header)
                 with open(tmp_file, 'w') as f:
-                    f.write("Total_Positions,Average_Coverage,Mismatched_Positions,Matched_Positions,")
+                    f.write("Total_Positions,Average_Coverage,Mismatched_Positions_Coverage_10_Or_Greater,Matched_Positions_Coverage_10_Or_Greater,")
                     f.write("Position_Mismatches,Position_Matches,Percent_Accuracy,")
                     f.write("Positions_With_At_Least_10x_Coverage,Fully_Spanning_Reads,")
                     f.write("Fully_Spanning_Reads_100%_Match\n")
@@ -642,7 +633,7 @@ def get_read_support_ighc(fofn, scratch):
             if not os.path.isfile(bam_file + ".bai"):
                 safe_run(["samtools", "index", bam_file])
 
-            gene_type = ["IGHC"]
+            gene_type = "IGHC"
             import_out = os.path.join(base_outd, gene_type, f"{sample}_make_gene_file_imported.csv")
             if not os.path.isfile(import_out):
                 continue
@@ -658,7 +649,7 @@ def get_read_support_ighc(fofn, scratch):
                 f.write("Matched_Positions_Coverage_Less_Than_10,")
                 f.write("Matched_Positions_Coverage_10_Or_Greater,")
                 f.write("Percent_Accuracy,")
-                f.write("Fully_Spanning_Allele_reads,Fully_Spanning_Allele_reads_100_Match,")
+                f.write("Fully_Spanning_Reads,Fully_Spanning_Reads_100%_Match,")
                 f.write("Allele_reads_100_Match_e1,Allele_reads_100_Match_e2,Allele_reads_100_Match_e3,")
                 f.write("Allele_reads_100_Match_e4,Allele_reads_100_Match_e5,Allele_reads_100_Match_e6,")
                 f.write("Allele_reads_100_Match_e7,Allele_reads_100_Match_e8,Allele_reads_100_Match_e9\n")
