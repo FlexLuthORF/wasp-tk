@@ -732,19 +732,7 @@ def get_read_support_ighc(fofn, scratch):
                         f_tmp.write("," * 21 + "\n")  # write blank line
                         continue
 
-                    # Make a region-specific BAM for the entire gene range
-                    # We need the min start, max end from the bed. But the original script
-                    # instead uses the entire gene region from contig:start-end. For IGHC,
-                    # the old script used parted logic. We'll do the same approach the script does:
-                    # Actually, the script does:
-                    #    samtools mpileup -f ref -l bed_file tmp_bam
-                    # That means it uses the bed to define the regions. We just need a tmp_bam for the gene range.
-                    # There's a snippet: 
-                    #   samtools view -F 0x100 -F 0x800 -b bam_file -o tmp_bam -U /dev/null contig:start-end
-                    # But the script doesn't show how start/end is determined for IGHC. We'll replicate the logic of the snippet:
-                    # We'll assume we use the minimal start, maximal end from the bed to define a single region for the temporary BAM.
-
-                    # Read the bed again to find minStart, maxEnd
+                  
                     min_start = None
                     max_end = None
                     try:
