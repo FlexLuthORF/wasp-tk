@@ -652,7 +652,10 @@ def get_read_support_ighc(fofn, scratch):
                 f.write("Fully_Spanning_Reads,Fully_Spanning_Reads_100%_Match,")
                 f.write("Allele_reads_100_Match_e1,Allele_reads_100_Match_e2,Allele_reads_100_Match_e3,")
                 f.write("Allele_reads_100_Match_e4,Allele_reads_100_Match_e5,Allele_reads_100_Match_e6,")
-                f.write("Allele_reads_100_Match_e7,Allele_reads_100_Match_e8,Allele_reads_100_Match_e9\n")
+                f.write("Allele_reads_100_Match_e7,Allele_reads_100_Match_e8,Allele_reads_100_Match_e9,")
+                f.write("Allele_reads_fully_spanning_e1,Allele_reads_fully_spanning_e2,Allele_reads_fully_spanning_e3,")
+                f.write("Allele_reads_fully_spanning_e4,Allele_reads_fully_spanning_e5,Allele_reads_fully_spanning_e6,")
+                f.write("Allele_reads_fully_spanning_e7,Allele_reads_fully_spanning_e8,Allele_reads_fully_spanning_e9\n")
 
             # Identify columns we need: contig, gene, plus C-EXON_X_start/end
             with open(import_out, 'r') as f_in:
