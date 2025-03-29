@@ -380,7 +380,7 @@ def get_read_support_vdj3(fofn, scratch):
                 tmp_file = import_out + "_read_support.tmp"
                 # Write a header to the tmp_file (to match the script's initial CSV header)
                 with open(tmp_file, 'w') as f:
-                    f.write("Total_Positions,Average_Coverage,Mismatched_Positions_Coverage_10_Or_Greater,Matched_Positions_Coverage_10_Or_Greater,")
+                    f.write("Total_Positions,Average_Coverage,Mismatched_Positions_Coverage_10_Or_Greater,Matched_Positions_Coverage_10_Or_Greater,") #! match, mismatch are not checked for 10x
                     f.write("Position_Mismatches,Position_Matches,Percent_Accuracy,")
                     f.write("Positions_With_At_Least_10x_Coverage,Fully_Spanning_Reads,")
                     f.write("Fully_Spanning_Reads_100%_Match\n")
@@ -598,10 +598,13 @@ def parse_mpileup_ighc(lines, total_positions):
                 matched_positions_cov_ge10 += 1
 
     percent_accuracy = (matched_positions / total_positions) * 100 if total_positions > 0 else 0
+    avg_cov = (total_reads/total_positions)
+    pos_10x = (mismatched_positions_cov_ge10 + matched_positions_cov_ge10)
 
     return (
         total_positions,
         total_reads,
+        avg_cov,
         mismatched_positions,
         matched_positions,
         ":".join(mismatch_list),
@@ -610,6 +613,7 @@ def parse_mpileup_ighc(lines, total_positions):
         mismatched_positions_cov_ge10,
         matched_positions_cov_lt10,
         matched_positions_cov_ge10,
+        pos_10x,
         percent_accuracy
     )
 
@@ -642,13 +646,13 @@ def get_read_support_ighc(fofn, scratch):
             
             # Write header to tmp_file
             with open(tmp_file, 'w') as f:
-                f.write("Total_Positions,Total_Reads_by_Positions,Mismatched_Positions,Matched_Positions,")
+                f.write("Total_Positions,Total_Reads_by_Positions,Average_Coverage,Mismatched_Positions,Matched_Positions,")
                 f.write("Position_Mismatches,Position_Matches,")
                 f.write("Mismatched_Positions_Coverage_Less_Than_10,")
                 f.write("Mismatched_Positions_Coverage_10_Or_Greater,")
                 f.write("Matched_Positions_Coverage_Less_Than_10,")
                 f.write("Matched_Positions_Coverage_10_Or_Greater,")
-                f.write("Percent_Accuracy,")
+                f.write("Positions_With_At_Least_10x_Coverage,Percent_Accuracy,")
                 f.write("Fully_Spanning_Reads,Fully_Spanning_Reads_100%_Match,")
                 f.write("Allele_reads_100_Match_e1,Allele_reads_100_Match_e2,Allele_reads_100_Match_e3,")
                 f.write("Allele_reads_100_Match_e4,Allele_reads_100_Match_e5,Allele_reads_100_Match_e6,")
@@ -801,6 +805,7 @@ def get_read_support_ighc(fofn, scratch):
                     (
                         tpos,
                         total_reads,
+                        avg_cov,
                         mismatched_positions,
                         matched_positions,
                         mismatch_str,
@@ -809,6 +814,7 @@ def get_read_support_ighc(fofn, scratch):
                         mismatched_positions_cov_ge10,
                         matched_positions_cov_lt10,
                         matched_positions_cov_ge10,
+                        pos_10x,
                         pct_acc
                     ) = parse_mpileup_ighc(mpileup_lines, total_positions)
 
@@ -827,11 +833,11 @@ def get_read_support_ighc(fofn, scratch):
                         match_out = match_res.stdout.strip()
 
                     # Write final line
-                    row_str = (f"{tpos},{total_reads},{mismatched_positions},{matched_positions},"
+                    row_str = (f"{tpos},{total_reads},{avg_cov},{mismatched_positions},{matched_positions},"
                                f"{mismatch_str},{match_str},"
                                f"{mismatched_positions_cov_lt10},{mismatched_positions_cov_ge10},"
                                f"{matched_positions_cov_lt10},{matched_positions_cov_ge10},"
-                               f"{pct_acc}")
+                               f"{pos_10x},{pct_acc}")
                     if match_out:
                         row_str += "," + match_out
                     f_tmp.write(row_str + "\n")
