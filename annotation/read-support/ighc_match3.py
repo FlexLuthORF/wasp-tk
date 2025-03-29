@@ -25,7 +25,8 @@ def get_sequences_and_regions_from_csv(import_csv, gene_key, contig):
                     seq_start = f'C-EXON_{i}_start'
                     seq_end = f'C-EXON_{i}_end'
                     sequence = row.get(sequence_column, '')
-                    sequence_start_end = (int(float(row.get(seq_start, ''))), int(float(row.get(seq_end, '')))) # exon specific start-end tuples
+                    if row.get(seq_start, '') != '' and row.get(seq_end, '') != '':
+                        sequence_start_end = (int(float(row.get(seq_start, ''))), int(float(row.get(seq_end, '')))) # exon specific start-end tuples
                     if reverse_comp and sequence:
                         sequence = reverse_complement(sequence)
                     if sequence:  # Only add non-empty sequences
@@ -37,6 +38,7 @@ def get_sequences_and_regions_from_csv(import_csv, gene_key, contig):
 
 def count_matching_reads(bamfile, sequences, regions, exon_start_end_list):
     full_span_counts = []
+    full_span_all_match_count_list = []
     perfect_match_counts = []
     perfect_spans_counts = []
     samfile = pysam.AlignmentFile(bamfile, "rb")
@@ -54,14 +56,11 @@ def count_matching_reads(bamfile, sequences, regions, exon_start_end_list):
             if read.reference_start <= start and read.reference_end >= end:
                 full_span_count += 1
                 read_seq = read.query_sequence
-                gene_seq = ''.join(sequences)
-                if gene_seq and (gene_seq in read_seq or reverese_complement(gene_seq) in read_seq):
+                for idx, sequence in enumerate(sequences):
+                    if sequence and (sequence in read_seq or reverse_complement(sequence) in read_seq):
+                        all_matches[idx] = 1
+                if 0 not in all_matches:
                     full_span_all_match_count += 1
-                #for idx, sequence in enumerate(sequences):
-                #    if sequence and (sequence in read_seq or reverse_complement(sequence) in read_seq):
-                #        all_matches[idx] = 1
-                #if 0 not in all_matches:
-                #    full_span_all_match_count += 1
             read_seq = read.query_sequence
             for idx, start_end in enumerate(exon_start_end_list):
                 ex_start = start_end[0]
@@ -74,7 +73,7 @@ def count_matching_reads(bamfile, sequences, regions, exon_start_end_list):
         full_span_counts.append(full_span_count)
         perfect_match_counts.append(perfect_matches)
         perfect_spans_counts.append(perfect_spans)
-    return full_span_counts, str(full_span_all_match_count), perfect_match_counts, perfect_spans_counts
+    return full_span_counts, full_span_all_match_count_list, perfect_match_counts, perfect_spans_counts
 
 if __name__ == '__main__':
     bamfile = sys.argv[1]
@@ -84,7 +83,7 @@ if __name__ == '__main__':
 
     sequences, regions, exon_start_end_list = get_sequences_and_regions_from_csv(import_csv, gene_key, contig)
     if sequences and regions:
-        full_span_counts, full_span_all_match_count, perfect_match_counts, perfect_spans_counts = count_matching_reads(bamfile, sequences, regions, exon_start_end_list) 
+        full_span_counts, full_span_all_match_count_list, perfect_match_counts, perfect_spans_counts = count_matching_reads(bamfile, sequences, regions, exon_start_end_list) 
         for i, (i_counts, j_counts) in enumerate(zip(perfect_match_counts, perfect_spans_counts)):
             print(f"{full_span_counts[i]},{full_span_all_match_count[i]},{','.join(map(str, i_counts))},{','.join(map(str, j_counts))}") # first we will get 100% exon matches then #no of fully spanning exon reads
 
