@@ -71,6 +71,7 @@ def count_matching_reads(bamfile, sequences, regions, exon_start_end_list):
                 if sequence and (sequence in read_seq or reverse_complement(sequence) in read_seq): 
                     perfect_matches[idx] += 1
         full_span_counts.append(full_span_count)
+        full_span_all_match_count_list.append(full_span_all_match_count)
         perfect_match_counts.append(perfect_matches)
         perfect_spans_counts.append(perfect_spans)
     return full_span_counts, full_span_all_match_count_list, perfect_match_counts, perfect_spans_counts
