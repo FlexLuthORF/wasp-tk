@@ -88,7 +88,7 @@ if __name__ == '__main__':
             i_counts_extended = (i_counts + [""] * 9)[:9] # fill 9 exon pos
             j_counts_extended = (j_counts + [""] * 9)[:9]
             
-            print(f"{full_span_counts[i]},{full_span_all_match_count[i]},{','.join(map(str, i_counts_extended))},{','.join(map(str, j_counts_extended))}") # first we will get 100% exon matches then #no of fully spanning exon reads
+            print(f"{full_span_counts[i]},{full_span_all_match_count_list[i]},{','.join(map(str, i_counts_extended))},{','.join(map(str, j_counts_extended))}") # first we will get 100% exon matches then #no of fully spanning exon reads
 
         #for i, counts in enumerate(perfect_match_counts):
         #    print(f"{full_span_counts[i]},{full_span_all_match_count[i]},{','.join(map(str, counts))}")
