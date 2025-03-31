@@ -124,25 +124,15 @@ def run_map_ccs_to_pers(fofn, scratch, mask_ref, minimap_option, threads):
 
             # Minimap2 alignment
             safe_run([
-                "minimap2", "-ax", minimap_option,
+                "minimap2",
+                "-ax", minimap_option,
                 "--secondary=yes",
                 "-t", str(threads),
-                "-L", pers_ref, reads_fasta
-            ] + [">", sam_out])  # We'll handle the redirection below more safely
-
-            # Because Python subprocess won't parse '>' easily, do the redirect by opening a file:
-            try:
-                with open(sam_out, 'w') as sam_f:
-                    subprocess.run([
-                        "minimap2", "-ax", minimap_option,
-                        "--secondary=yes",
-                        "-t", str(threads),
-                        "-L", pers_ref, reads_fasta
-                    ], stdout=sam_f)
-            except Exception as e:
-                print(f"[WARNING] Failed minimap2 alignment for sample {sample}")
-                print(e)
-
+                "-L",
+                pers_ref,
+                reads_fasta,
+                "-o", sam_out
+            ])
             # Convert SAM to BAM
             safe_run(["samtools", "view", "-Sbh", sam_out, "-o", bam_out])
             # Sort

@@ -41,7 +41,7 @@ function map_ccs_to_ref {
     percent_on=$(echo "scale=2; (100 * $on_target) / $full" | bc -l)
     echo "$percent_on" > ${outdir}/percent_on_target.txt
 }
-function map_ccs_to_pers_ref {_
+function map_ccs_to_pers_ref {
     dir=$scratch/ccs_cov
     outdir=${scratch}/run_wasp/${sample}/ccs_cov
     mkdir -p $outdir
