@@ -81,7 +81,7 @@ function process_vcf {
     # fi
     "${vcfanno}" "${anno_config_file}" "${of}.vcf.gz" > "${sample_vcf_dir}/${sample}_annotated.vcf"
     bgzip "${sample_vcf_dir}/${sample}_annotated.vcf"
-    bcftools index "${sample_vcf_dir}/${sample}_annotated.vcf"
+    bcftools index "${sample_vcf_dir}/${sample}_annotated.vcf.gz"
 }
 
 # Inputs from the user or script
