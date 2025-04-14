@@ -44,8 +44,38 @@ for loci in "${loci_list[@]}"; do
           "${orig_outdir}/read_support/${sample}/imported_genes/${loci}/${sample}_make_gene_file_imported_with_read_support.csv"
 done
 
-mv ${orig_outdir}/vcfs/${sample}_annotated.vcf.gz ${outdir}/variants/${sample}_annotated.vcf.gz
-ln -s ${outdir}/variants/${sample}_annotated.vcf.gz ${orig_outdir}/vcfs/${sample}_annotated.vcf.gz
+
+
+# Move and link for the contigs-bcftools files
+mv ${orig_outdir}/vcfs/${sample}_contigs-bcftools_annotated.vcf.gz ${outdir}/variants/${sample}_contigs-bcftools_annotated.vcf.gz
+ln -s ${outdir}/variants/${sample}_contigs-bcftools_annotated.vcf.gz ${orig_outdir}/vcfs/${sample}_contigs-bcftools_annotated.vcf.gz
+
+mv ${orig_outdir}/vcfs/${sample}_contigs-bcftools_annotated.vcf.gz.csi ${outdir}/variants/${sample}_contigs-bcftools_annotated.vcf.gz.csi
+ln -s ${outdir}/variants/${sample}_contigs-bcftools_annotated.vcf.gz.csi ${orig_outdir}/vcfs/${sample}_contigs-bcftools_annotated.vcf.gz.csi
+
+# Move and link for the ccs-bcftools files
+mv ${orig_outdir}/vcfs/${sample}_ccs-bcftools_annotated.vcf.gz ${outdir}/variants/${sample}_ccs-bcftools_annotated.vcf.gz
+ln -s ${outdir}/variants/${sample}_ccs-bcftools_annotated.vcf.gz ${orig_outdir}/vcfs/${sample}_ccs-bcftools_annotated.vcf.gz
+
+mv ${orig_outdir}/vcfs/${sample}_ccs-bcftools_annotated.vcf.gz.csi ${outdir}/variants/${sample}_ccs-bcftools_annotated.vcf.gz.csi
+ln -s ${outdir}/variants/${sample}_ccs-bcftools_annotated.vcf.gz.csi ${orig_outdir}/vcfs/${sample}_ccs-bcftools_annotated.vcf.gz.csi
+
+# Move and link for the clair-from-contigs files
+mv ${orig_outdir}/vcfs/${sample}_clair-from-contigs_annotated.vcf.gz ${outdir}/variants/${sample}_clair-from-contigs_annotated.vcf.gz
+ln -s ${outdir}/variants/${sample}_clair-from-contigs_annotated.vcf.gz ${orig_outdir}/vcfs/${sample}_clair-from-contigs_annotated.vcf.gz
+
+mv ${orig_outdir}/vcfs/${sample}_clair-from-contigs_annotated.vcf.gz.csi ${outdir}/variants/${sample}_clair-from-contigs_annotated.vcf.gz.csi
+ln -s ${outdir}/variants/${sample}_clair-from-contigs_annotated.vcf.gz.csi ${orig_outdir}/vcfs/${sample}_clair-from-contigs_annotated.vcf.gz.csi
+
+# Move and link for the clair-from-ccs files
+mv ${orig_outdir}/vcfs/${sample}_clair-from-ccs_annotated.vcf.gz ${outdir}/variants/${sample}_clair-from-ccs_annotated.vcf.gz
+ln -s ${outdir}/variants/${sample}_clair-from-ccs_annotated.vcf.gz ${orig_outdir}/vcfs/${sample}_clair-from-ccs_annotated.vcf.gz
+
+mv ${orig_outdir}/vcfs/${sample}_clair-from-ccs_annotated.vcf.gz.csi ${outdir}/variants/${sample}_clair-from-ccs_annotated.vcf.gz.csi
+ln -s ${outdir}/variants/${sample}_clair-from-ccs_annotated.vcf.gz.csi ${orig_outdir}/vcfs/${sample}_clair-from-ccs_annotated.vcf.gz.csi
+
+
+
 
 #mv ${orig_outdir}/ccs_cov/average_chrom_coverage.tsv ${outdir}/stats/${sample}_personal-ref-based_depth.tsv
 #ln -s ${outdir}/stats/${sample}_personal-ref-based_depth.tsv ${orig_outdir}/ccs_cov/average_chrom_coverage.tsv
