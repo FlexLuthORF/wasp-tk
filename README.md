@@ -1,4 +1,5 @@
 # WASP README
+![f706849b-0f9b-47fe-b0da-a0d612153eaa-1](https://github.com/user-attachments/assets/1813908b-760e-432c-b6e6-c0e9bd26cd2a)
 
 ## Overview
 
