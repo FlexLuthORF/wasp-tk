@@ -95,6 +95,7 @@ function process_vcf {
     #     "${vcfanno}" "${anno_config_file}" "${of}.vcf.gz" > "${sample_vcf_dir}/${sample}_annotated.vcf"
     #     bgzip "${sample_vcf_dir}/${sample}_annotated.vcf"
     # fi
+
     "${vcfanno}" "${anno_config_file}" "${of}.contigs.vcf.gz" > "${sample_vcf_dir}/${sample}_contigs-bcftools_annotated.vcf"
     bgzip "${sample_vcf_dir}/${sample}_contigs-bcftools_annotated.vcf"
     bcftools index "${sample_vcf_dir}/${sample}_contigs-bcftools_annotated.vcf.gz"
@@ -110,6 +111,7 @@ function process_vcf {
     "${vcfanno}" "${anno_config_file}" "${sample_vcf_dir}/clair-from-ccs/merge_output.vcf.gz" > "${sample_vcf_dir}/${sample}_clair-from-ccs_annotated.vcf"
     bgzip "${sample_vcf_dir}/${sample}_clair-from-ccs_annotated.vcf"
     bcftools index "${sample_vcf_dir}/${sample}_clair-from-ccs_annotated.vcf.gz"
+
 }
 
 # Inputs from the user or script

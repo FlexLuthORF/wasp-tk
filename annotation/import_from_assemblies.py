@@ -252,19 +252,46 @@ def process_c_gene(refname, sense, beds, notes, refs, res, row):
     missing_exons = []
     all_missing = True
 
+    #if 'IGHA1' in gene:
+    #    breakpoint()
+
     if max_exon:
         res['C-REGION'] = ''
-        res['C-REGION_CIGAR'] = ''
+        res['C-REGION_CIGAR'] = []
         for exon_no in range(1, max_exon + 1):
             row_el = f'C-EXON_{exon_no}'
             res[row_el] = simple.reverse_complement(row[row_el]) if sense == '-' else row[row_el]
             res[row_el + '_CIGAR'] = row[row_el + '_CIGAR']
+            res['C-REGION'] += res[row_el]
+
             if res[row_el] == '':
                 missing_exons.append(str(exon_no))
+                exon_start = beds[refname][gene + f'_{exon_no}']['GENE']['start']
+                exon_end = beds[refname][gene + f'_{exon_no}']['GENE']['end'] - 1
+                exon_length = exon_end - exon_start + 1
+                res[row_el + '_CIGAR'] = str(exon_length) + 'D'
             else:
-                res['C-REGION'] += res[row_el]
-                res['C-REGION_CIGAR'] += res[row_el + '_CIGAR']
                 all_missing = False
+
+            # calculate length of gap between exons
+            if exon_no > 1:
+                if sense == '+':
+                    gap_start = beds[refname][gene + f'_{exon_no - 1}']['GENE']['end']
+                    gap_end = beds[refname][gene + f'_{exon_no}']['GENE']['start'] - 1
+                else:
+                    gap_end = beds[refname][gene + f'_{exon_no - 1}']['GENE']['start'] - 1
+                    gap_start = beds[refname][gene + f'_{exon_no}']['GENE']['end']
+                
+                gap_length = gap_end - gap_start + 1
+                res['C-REGION_CIGAR'].append(str(gap_length) + 'N')
+
+            res['C-REGION_CIGAR'].append(res[row_el + '_CIGAR'])
+
+        if sense == '+':
+            res['C-REGION_CIGAR'] = ''.join(res['C-REGION_CIGAR'])
+        else:
+            res['C-REGION_CIGAR'] = ''.join(res['C-REGION_CIGAR'][::-1])
+
     else:
         res['C-REGION'] = row['allele_sequence']
         res['C-REGION_CIGAR'] = row['allele_sequence_CIGAR']
