@@ -35,3 +35,21 @@ Run the pipeline using Singularity with the following command:
    - `reads/`: Filtered contigs and CCS reads.
    - `stats/`: Assembly statistics and depth information.
    - `variants/`: Annotated VCF files.
+
+## Python Toolkit
+
+Install the toolkit in editable mode:
+
+```bash
+pip install -e .
+```
+
+### Read Support Command
+
+Compute read support for a single annotation table given a BAM file of mapped reads:
+
+```bash
+wasptk-read-support <allele_annotation.csv> <mapped.bam> <output.csv>
+```
+
+Use `--contig-col`, `--start-col`, `--end-col`, and `--gene-col` to override column names if needed.
