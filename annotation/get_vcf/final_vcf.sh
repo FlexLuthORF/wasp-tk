@@ -55,23 +55,26 @@ function process_vcf {
 
     local of="${sample_vcf_dir}/${sample}"
     bcftools mpileup -B -a QS -Ou -f "${reffn}" -R ${bed_dir}/IG_loci.bed --threads "${num_threads}" "$bam_file" | \
-    bcftools call -m -Oz -o "${of}.contigs.vcf.gz"
-    bcftools index "${of}.contigs.vcf.gz"
+    bcftools call -m -Oz -o "${of}.tmp.contigs.vcf.gz"
+    bcftools sort --write-index "${of}.tmp.contigs.vcf.gz" -Oz -o "${of}.contigs.vcf.gz"
 
     bcftools mpileup -B -a QS -Ou -f "${reffn}" -R ${bed_dir}/IG_loci.bed --threads "${num_threads}" "$ccs_bam_file" | \
-    bcftools call -m -Oz -o "${of}.ccs.vcf.gz"
-    bcftools index "${of}.ccs.vcf.gz"
+    bcftools call -m -Oz -o "${of}.tmp.ccs.vcf.gz"
+    bcftools sort --write-index "${of}.tmp.ccs.vcf.gz" -Oz -o "${of}.ccs.vcf.gz"
 
-    clair3-run \
-    --bam_fn="$bam_file" --ref_fn="$reffn" \
-    --bed_fn="${bed_dir}/IG_loci.bed" --threads="$num_threads" \
-    --platform="hifi" --include_all_ctgs \
-    --model_path="/opt/sandboxes/clair3_latest/opt/models/hifi_revio" \
-    --sample="${sample}" \
-    --output="${sample_vcf_dir}/clair-from-contigs"
+#     clair3-run \
+#     --bam_fn="$bam_file" --ref_fn="$reffn" \
+#     --bed_fn="${bed_dir}/IG_loci.bed" --threads="$num_threads" \
+#     --platform="hifi" --include_all_ctgs \
+#     --model_path="/opt/sandboxes/clair3_latest/opt/models/hifi_revio" \
+#     --sample="${sample}" \
+#     --no_phasing_for_fa \
+#     --min_coverage=2 \
+#     --enable_long_indel \
+#     --output="${sample_vcf_dir}/clair-from-contigs"
 
-   clair3-run \
-    --bam_fn="$ccs_bam_file" --ref_fn="$reffn" --bed_fn="${bed_dir}/IG_loci.bed" --threads="$num_threads" --platform="hifi" --include_all_ctgs --model_path="/opt/sandboxes/clair3_latest/opt/models/hifi_revio" --sample="${sample}" --output="${sample_vcf_dir}/clair-from-ccs"
+#    clair3-run \
+#     --bam_fn="$ccs_bam_file" --ref_fn="$reffn" --bed_fn="${bed_dir}/IG_loci.bed" --threads="$num_threads" --platform="hifi" --include_all_ctgs --model_path="/opt/sandboxes/clair3_latest/opt/models/hifi_revio" --sample="${sample}" --output="${sample_vcf_dir}/clair-from-ccs"
 
     # if grep -q -P "\t0/1$" "${sample_vcf_dir}/${sample}_sv_genotype_results.txt"; then
     #     local output_vcf="${sample_vcf_dir}/${sample}_hemi.vcf"
@@ -104,13 +107,14 @@ function process_vcf {
     bgzip "${sample_vcf_dir}/${sample}_ccs-bcftools_annotated.vcf"
     bcftools index "${sample_vcf_dir}/${sample}_ccs-bcftools_annotated.vcf.gz"
 
-    "${vcfanno}" "${anno_config_file}" "${sample_vcf_dir}/clair-from-contigs/merge_output.vcf.gz" > "${sample_vcf_dir}/${sample}_clair-from-contigs_annotated.vcf"
-    bgzip "${sample_vcf_dir}/${sample}_clair-from-contigs_annotated.vcf"
-    bcftools index "${sample_vcf_dir}/${sample}_clair-from-contigs_annotated.vcf.gz"
+    # bcftools sort -
+    # "${vcfanno}" "${anno_config_file}" "${sample_vcf_dir}/clair-from-contigs/merge_output.vcf.gz" > "${sample_vcf_dir}/${sample}_clair-from-contigs_annotated.vcf"
+    # bgzip "${sample_vcf_dir}/${sample}_clair-from-contigs_annotated.vcf"
+    # bcftools index "${sample_vcf_dir}/${sample}_clair-from-contigs_annotated.vcf.gz"
 
-    "${vcfanno}" "${anno_config_file}" "${sample_vcf_dir}/clair-from-ccs/merge_output.vcf.gz" > "${sample_vcf_dir}/${sample}_clair-from-ccs_annotated.vcf"
-    bgzip "${sample_vcf_dir}/${sample}_clair-from-ccs_annotated.vcf"
-    bcftools index "${sample_vcf_dir}/${sample}_clair-from-ccs_annotated.vcf.gz"
+    # "${vcfanno}" "${anno_config_file}" "${sample_vcf_dir}/clair-from-ccs/merge_output.vcf.gz" > "${sample_vcf_dir}/${sample}_clair-from-ccs_annotated.vcf"
+    # bgzip "${sample_vcf_dir}/${sample}_clair-from-ccs_annotated.vcf"
+    # bcftools index "${sample_vcf_dir}/${sample}_clair-from-ccs_annotated.vcf.gz"
 
 }
 

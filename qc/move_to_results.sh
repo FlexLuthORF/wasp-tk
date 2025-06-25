@@ -61,18 +61,18 @@ mv ${orig_outdir}/vcfs/${sample}_ccs-bcftools_annotated.vcf.gz.csi ${outdir}/var
 ln -s ${outdir}/variants/${sample}_ccs-bcftools_annotated.vcf.gz.csi ${orig_outdir}/vcfs/${sample}_ccs-bcftools_annotated.vcf.gz.csi
 
 # Move and link for the clair-from-contigs files
-mv ${orig_outdir}/vcfs/${sample}_clair-from-contigs_annotated.vcf.gz ${outdir}/variants/${sample}_clair-from-contigs_annotated.vcf.gz
-ln -s ${outdir}/variants/${sample}_clair-from-contigs_annotated.vcf.gz ${orig_outdir}/vcfs/${sample}_clair-from-contigs_annotated.vcf.gz
+# mv ${orig_outdir}/vcfs/${sample}_clair-from-contigs_annotated.vcf.gz ${outdir}/variants/${sample}_clair-from-contigs_annotated.vcf.gz
+# ln -s ${outdir}/variants/${sample}_clair-from-contigs_annotated.vcf.gz ${orig_outdir}/vcfs/${sample}_clair-from-contigs_annotated.vcf.gz
 
-mv ${orig_outdir}/vcfs/${sample}_clair-from-contigs_annotated.vcf.gz.csi ${outdir}/variants/${sample}_clair-from-contigs_annotated.vcf.gz.csi
-ln -s ${outdir}/variants/${sample}_clair-from-contigs_annotated.vcf.gz.csi ${orig_outdir}/vcfs/${sample}_clair-from-contigs_annotated.vcf.gz.csi
+# mv ${orig_outdir}/vcfs/${sample}_clair-from-contigs_annotated.vcf.gz.csi ${outdir}/variants/${sample}_clair-from-contigs_annotated.vcf.gz.csi
+# ln -s ${outdir}/variants/${sample}_clair-from-contigs_annotated.vcf.gz.csi ${orig_outdir}/vcfs/${sample}_clair-from-contigs_annotated.vcf.gz.csi
 
-# Move and link for the clair-from-ccs files
-mv ${orig_outdir}/vcfs/${sample}_clair-from-ccs_annotated.vcf.gz ${outdir}/variants/${sample}_clair-from-ccs_annotated.vcf.gz
-ln -s ${outdir}/variants/${sample}_clair-from-ccs_annotated.vcf.gz ${orig_outdir}/vcfs/${sample}_clair-from-ccs_annotated.vcf.gz
+# # Move and link for the clair-from-ccs files
+# mv ${orig_outdir}/vcfs/${sample}_clair-from-ccs_annotated.vcf.gz ${outdir}/variants/${sample}_clair-from-ccs_annotated.vcf.gz
+# ln -s ${outdir}/variants/${sample}_clair-from-ccs_annotated.vcf.gz ${orig_outdir}/vcfs/${sample}_clair-from-ccs_annotated.vcf.gz
 
-mv ${orig_outdir}/vcfs/${sample}_clair-from-ccs_annotated.vcf.gz.csi ${outdir}/variants/${sample}_clair-from-ccs_annotated.vcf.gz.csi
-ln -s ${outdir}/variants/${sample}_clair-from-ccs_annotated.vcf.gz.csi ${orig_outdir}/vcfs/${sample}_clair-from-ccs_annotated.vcf.gz.csi
+# mv ${orig_outdir}/vcfs/${sample}_clair-from-ccs_annotated.vcf.gz.csi ${outdir}/variants/${sample}_clair-from-ccs_annotated.vcf.gz.csi
+# ln -s ${outdir}/variants/${sample}_clair-from-ccs_annotated.vcf.gz.csi ${orig_outdir}/vcfs/${sample}_clair-from-ccs_annotated.vcf.gz.csi
 
 
 
