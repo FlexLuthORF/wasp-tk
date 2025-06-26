@@ -1,8 +1,6 @@
 # WASP Toolkit
 
-This repository provides scripts and utilities for immune receptor analysis. A Python
-package exposes a `wasptk` command with subcommands. The `readsupport` subcommand
-computes read support metrics from a mapped BAM and an annotation table.
+This repository provides scripts and utilities for genomic data analysis with a focus on immune receptors. 
 
 ## Installation
 
