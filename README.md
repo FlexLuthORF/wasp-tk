@@ -1,8 +1,8 @@
 # WASP Toolkit
 
 This repository provides scripts and utilities for immune receptor analysis. A Python
-package exposes a `wasptk-read-support` command that computes read support metrics
-from a mapped BAM and an annotation table.
+package exposes a `wasptk` command with subcommands. The `readsupport` subcommand
+computes read support metrics from a mapped BAM and an annotation table.
 
 ## Installation
 
@@ -13,7 +13,7 @@ pip install -e .
 ## Usage
 
 ```bash
-wasptk-read-support <allele_annotation.csv> <mapped.bam> <output.csv>
+wasptk readsupport <allele_annotation.csv> <mapped.bam> <output.csv>
 ```
 
 Optional flags allow overriding the column names in the annotation table using
@@ -37,3 +37,13 @@ For each row in the annotation table the command appends the following columns:
 
 Constant-region genes (`IGKC`, `IGLC`, `TRAC`, `TRBC`, `TRDC`, `TRGC`, `IGHC`) include
 additional coverage breakdowns by 10× thresholds and per‑exon match/spanning counts.
+
+### Plotting coverage
+
+Another subcommand generates coverage visualisations from `mosdepth` output:
+
+```bash
+wasptk plotcov --depth per-base.bed.gz --loci loci.bed --out prefix
+```
+
+This writes two images: `prefix_bedgraph.png` and `prefix_covgraph.png`.

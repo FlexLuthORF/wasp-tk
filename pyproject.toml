@@ -7,4 +7,4 @@ requires-python = ">=3.8"
 dependencies = ["pandas", "pysam"]
 
 [project.scripts]
-wasptk-read-support = "wasptk.cli:main"
+wasptk = "wasptk.cli:main"

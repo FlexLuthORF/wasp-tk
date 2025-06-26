@@ -2,17 +2,7 @@ import argparse
 from .read_support import compute_read_support
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Compute read support from a BAM")
-    parser.add_argument("allele_table", help="Path to allele_annotation.csv")
-    parser.add_argument("bam", help="Mapped reads BAM")
-    parser.add_argument("output", help="Output CSV")
-    parser.add_argument("--contig-col", default="contig", help="Column for contig name")
-    parser.add_argument("--start-col", default="start", help="Column for start position")
-    parser.add_argument("--end-col", default="end", help="Column for end position")
-    parser.add_argument("--gene-col", default="gene", help="Column for gene name")
-
-    args = parser.parse_args()
+def _cmd_readsupport(args: argparse.Namespace) -> None:
     compute_read_support(
         args.allele_table,
         args.bam,
@@ -22,6 +12,43 @@ def main() -> None:
         end_col=args.end_col,
         gene_col=args.gene_col,
     )
+
+
+def _cmd_plotcov(args: argparse.Namespace) -> None:
+    from .plotcov import plotcov
+    plotcov(args.depth, args.loci, args.out)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(prog="wasptk", description="WASP toolkit")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    p_read = sub.add_parser("readsupport", help="Compute read support from a BAM")
+    p_read.add_argument("allele_table", help="Path to allele_annotation.csv")
+    p_read.add_argument("bam", help="Mapped reads BAM")
+    p_read.add_argument("output", help="Output CSV")
+    p_read.add_argument("--contig-col", default="contig", help="Column for contig name")
+    p_read.add_argument("--start-col", default="start", help="Column for start position")
+    p_read.add_argument("--end-col", default="end", help="Column for end position")
+    p_read.add_argument("--gene-col", default="gene", help="Column for gene name")
+    p_read.set_defaults(func=_cmd_readsupport)
+
+    p_plot = sub.add_parser(
+        "plotcov", help="Plot coverage graphs from mosdepth output"
+    )
+    p_plot.add_argument("--depth", required=True, help="mosdepth per-base BED.gz")
+    p_plot.add_argument(
+        "--loci", required=True, help="4-column BED: chrom, start, end, name"
+    )
+    p_plot.add_argument(
+        "--out",
+        required=True,
+        help="output images prefix (e.g. PNG)",
+    )
+    p_plot.set_defaults(func=_cmd_plotcov)
+
+    args = parser.parse_args()
+    args.func(args)
 
 
 if __name__ == "__main__":
