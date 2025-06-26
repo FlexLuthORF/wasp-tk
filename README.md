@@ -15,7 +15,7 @@ wasptk readsupport <allele_annotation.csv> <mapped.bam> <output.csv>
 ```
 
 Optional flags allow overriding the column names in the annotation table using
-`--contig-col`, `--start-col`, `--end-col`, and `--gene-col`.
+`--contig-col`(default:'contig'), `--start-col`(default:'start'), `--end-col`(default:'end'), and `--gene-col`(default:'gene').
 
 ### Output columns
 
