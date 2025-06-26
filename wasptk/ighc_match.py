@@ -33,10 +33,12 @@ def count_matching_reads(
     end: int,
     sequences: List[str],
     exon_coords: List[Tuple[int, int]],
-) -> Tuple[int, int]:
-    """Return counts of reads spanning region and matching all exon sequences."""
+) -> Tuple[int, int, List[int], List[int]]:
+    """Return counts of reads spanning region with per-exon metrics."""
     full_span = 0
     full_span_all_match = 0
+    match_counts = [0] * len(sequences)
+    span_counts = [0] * len(exon_coords)
     for read in bam.fetch(chrom, start, end):
         if read.is_unmapped or read.is_secondary or read.is_supplementary:
             continue
@@ -45,4 +47,11 @@ def count_matching_reads(
             seq = read.query_sequence
             if all(seq_part in seq or reverse_complement(seq_part) in seq for seq_part in sequences):
                 full_span_all_match += 1
-    return full_span, full_span_all_match
+        seq = read.query_sequence
+        for i, seq_part in enumerate(sequences):
+            if seq_part and (seq_part in seq or reverse_complement(seq_part) in seq):
+                match_counts[i] += 1
+        for i, (s, e) in enumerate(exon_coords):
+            if read.reference_start <= s and read.reference_end >= e:
+                span_counts[i] += 1
+    return full_span, full_span_all_match, match_counts, span_counts
