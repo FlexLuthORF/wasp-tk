@@ -29,7 +29,11 @@ def run_mpileup(bam: str, reference: str, region: str | None = None, bed: str | 
     return result.stdout.strip().splitlines()
 
 
-def parse_mpileup_and_calculate(lines: List[str], total_positions: int) -> Tuple[int, float, int, int, str, str, float, int]:
+def parse_mpileup_and_calculate(
+    lines: List[str],
+    total_positions: int,
+) -> Tuple[int, int, float, int, int, str, str, float, int]:
+    """Parse mpileup lines and calculate read-support metrics."""
     total_reads = 0
     mismatched_positions = 0
     matched_positions = 0
@@ -72,6 +76,7 @@ def parse_mpileup_and_calculate(lines: List[str], total_positions: int) -> Tuple
 
     return (
         total_positions,
+        total_reads,
         avg_reads_per_position,
         mismatched_positions,
         matched_positions,
@@ -226,6 +231,7 @@ def compute_read_support(
             total_pos = end - start + 1
             (
                 tpos,
+                total_reads,
                 avg_cov,
                 mismatched_positions,
                 matched_positions,
@@ -238,6 +244,7 @@ def compute_read_support(
             full_span, perfect = count_match_sub(bam, contig, start, end, seq)
             row_metrics = {
                 "Total_Positions": tpos,
+                "Total_Reads_by_Positions": total_reads,
                 "Average_Coverage": avg_cov,
                 "Mismatched_Positions": mismatched_positions,
                 "Matched_Positions": matched_positions,
