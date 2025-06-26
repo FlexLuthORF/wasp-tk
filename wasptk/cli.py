@@ -6,7 +6,6 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Compute read support from a BAM")
     parser.add_argument("allele_table", help="Path to allele_annotation.csv")
     parser.add_argument("bam", help="Mapped reads BAM")
-    parser.add_argument("reference", help="Reference FASTA used for mapping")
     parser.add_argument("output", help="Output CSV")
     parser.add_argument("--contig-col", default="contig", help="Column for contig name")
     parser.add_argument("--start-col", default="start", help="Column for start position")
@@ -17,7 +16,6 @@ def main() -> None:
     compute_read_support(
         args.allele_table,
         args.bam,
-        args.reference,
         args.output,
         contig_col=args.contig_col,
         start_col=args.start_col,
