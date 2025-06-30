@@ -34,10 +34,15 @@ def _read_aim_pos(path: Path) -> Tuple[List[str], List[str]]:
 
 
 def _read_vcf(vcf_file: str) -> Tuple[str, Dict[str, str]]:
-    """Read a simple VCF file and return the sample name and genotype map."""
+    """Read a simple VCF (optionally gzipped) and return sample name and genotypes."""
     sample = ""
     gt_map: Dict[str, str] = {}
-    with open(vcf_file) as fh:
+    opener = open
+    if vcf_file.endswith(".gz"):
+        import gzip
+
+        opener = gzip.open
+    with opener(vcf_file, "rt") as fh:
         for line in fh:
             if line.startswith("##"):
                 continue

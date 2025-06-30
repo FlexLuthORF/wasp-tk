@@ -56,6 +56,8 @@ available in the environment.
 wasptk aims sample.vcf -o result.json
 ```
 
+The input VCF may be plain text or gzipped (`.vcf.gz`).
+
 The output is a JSON document reporting the inferred ancestry, probabilities
 for each ancestry and how many AIMs were present in the input VCF. Use the
 `-o/--output` option to write this JSON to a file.
