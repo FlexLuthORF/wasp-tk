@@ -53,12 +53,13 @@ informative markers. The command expects the `structure` program to be
 available in the environment.
 
 ```bash
-wasptk aims sample.vcf --bam sample.bam -s SAMPLE_ID -o result.json
+wasptk aims -v sample.vcf -b sample.bam -s SAMPLE_ID -o result.json
 ```
 
 The input VCF may be plain text, gzipped (`.vcf.gz`) or BCF.
 
 The output is a JSON document reporting the inferred ancestry, probabilities
 for each ancestry and how many AIMs were present in the input VCF. Use
-`--bam` to provide the alignment file used for coverage calculation, `-s/--sample`
-to specify a sample identifier and `-o/--output` to write the JSON to a file.
+`-b/--bam` to provide the alignment file used for coverage calculation,
+`-v/--vcf` to specify the AIM variant file, `-s/--sample` to set a sample
+identifier and `-o/--output` to write the JSON to a file.
