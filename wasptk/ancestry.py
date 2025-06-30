@@ -7,7 +7,7 @@ import subprocess
 import tempfile
 from itertools import islice
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Iterable
 
 import pysam
 
@@ -31,6 +31,40 @@ def _read_aim_pos(path: Path) -> Tuple[List[str], List[str]]:
             aim_pos.append(line.split('_')[1])
     all_aim_pos = [f"{c}_{p}" for c, p in zip(chr_no, aim_pos)]
     return all_aim_pos, aim_pos
+
+
+def _read_aim_intervals(path: Path) -> List[Tuple[str, int, int]]:
+    """Return chromosome, start and end coordinates for each AIM."""
+    intervals: List[Tuple[str, int, int]] = []
+    with open(path) as fh:
+        for line in fh:
+            chrom, start, end = line.strip().split("_")
+            intervals.append((chrom, int(start), int(end)))
+    return intervals
+
+
+def _high_cov_from_bam(
+    bam_file: str, intervals: Iterable[Tuple[str, int, int]], aim_pos: Iterable[str]
+) -> List[str]:
+    """Return AIM keys with at least 10x coverage using a BAM file."""
+    samfile = pysam.AlignmentFile(bam_file, "rb")
+    high_cov: List[str] = []
+    for (chrom, start, end), pos in zip(intervals, aim_pos):
+        for pileupcolumn in samfile.pileup(chrom, start, end):
+            if pileupcolumn.pos == int(pos) and pileupcolumn.n >= 10:
+                high_cov.append(f"{chrom}_{pos}")
+                break
+    return high_cov
+
+
+def _high_cov_from_dp(aim_pos: Iterable[str], dp_map: Dict[str, int]) -> List[str]:
+    """Fallback high coverage detection using DP values from VCF."""
+    high_cov = []
+    for pos in aim_pos:
+        dp = dp_map.get(pos)
+        if dp is None or dp >= 10:
+            high_cov.append(pos)
+    return high_cov
 
 
 def _read_vcf(vcf_file: str) -> Tuple[str, Dict[str, str], Dict[str, int]]:
@@ -59,23 +93,16 @@ def _add_sample_code(ref_sample_no: int, sample_name: str) -> Dict[str, int]:
 def _convert_to_structure(
     aim_pos: List[str],
     gt_map: Dict[str, str],
-    dp_map: Dict[str, int],
+    high_cov: Iterable[str],
     sample_code: Dict[str, int],
-) -> Tuple[List[str], List[str], List[str]]:
+) -> Tuple[List[str], List[str]]:
+    cov_set = set(high_cov)
     all_gt: List[str] = []
-    high_cov: List[str] = []
     for pos in aim_pos:
-        dp = dp_map.get(pos)
-        if pos in gt_map:
-            dp_val = dp if dp is not None else 0
-            if dp_val >= 10 or dp is None:
-                gt = gt_map[pos]
-            else:
-                gt = "-9/-9"
+        if pos in cov_set:
+            gt = gt_map.get(pos, "0/0")
         else:
             gt = "-9/-9"
-        if gt != "-9/-9":
-            high_cov.append(pos)
         all_gt.append(gt)
     hap1: List[str] = []
     hap2: List[str] = []
@@ -90,7 +117,7 @@ def _convert_to_structure(
     hap2.insert(0, str(code))
     hap1 = hap1[:1] + ["1", "0"] + hap1[1:]
     hap2 = hap2[:1] + ["1", "0"] + hap2[1:]
-    return hap1, hap2, high_cov
+    return hap1, hap2
 
 
 def _write_input_file(hap1: List[str], hap2: List[str], out_path: Path) -> None:
@@ -184,12 +211,17 @@ def _parse_structure_result(
     }
 
 
-def run_aims(vcf: str, sample_id: str | None = None) -> Dict[str, object]:
+def run_aims(vcf: str, sample_id: str | None = None, bam: str | None = None) -> Dict[str, object]:
     """Infer sample ancestry from a VCF of 96 AIM variants."""
-    all_aim_pos, _ = _read_aim_pos(_AIM_POSITIONS)
+    all_aim_pos, aim_pos = _read_aim_pos(_AIM_POSITIONS)
     sample_name, gt_map, dp_map = _read_vcf(vcf)
+    if bam is not None:
+        intervals = _read_aim_intervals(_DATA_DIR / "Capture96AIMString.txt")
+        high_cov = _high_cov_from_bam(bam, intervals, aim_pos)
+    else:
+        high_cov = _high_cov_from_dp(all_aim_pos, dp_map)
     sample_code = _add_sample_code(2504, sample_name)
-    hap1, hap2, high_cov = _convert_to_structure(all_aim_pos, gt_map, dp_map, sample_code)
+    hap1, hap2 = _convert_to_structure(all_aim_pos, gt_map, high_cov, sample_code)
     with tempfile.TemporaryDirectory() as tmp:
         tmpdir = Path(tmp)
         input_file = tmpdir / "1KGP_SuperPop_with_SampleGT.txt"
