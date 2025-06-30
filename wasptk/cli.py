@@ -1,5 +1,7 @@
 import argparse
+import json
 from .read_support import compute_read_support
+from .ancestry import run_aims
 
 
 def _cmd_readsupport(args: argparse.Namespace) -> None:
@@ -17,6 +19,11 @@ def _cmd_readsupport(args: argparse.Namespace) -> None:
 def _cmd_plotcov(args: argparse.Namespace) -> None:
     from .plotcov import plotcov
     plotcov(args.depth, args.loci, args.out)
+
+
+def _cmd_aims(args: argparse.Namespace) -> None:
+    res = run_aims(args.vcf)
+    print(json.dumps(res, indent=2))
 
 
 def main() -> None:
@@ -46,6 +53,10 @@ def main() -> None:
         help="output images prefix (e.g. PNG)",
     )
     p_plot.set_defaults(func=_cmd_plotcov)
+
+    p_aims = sub.add_parser("aims", help="Infer ancestry using AIMs")
+    p_aims.add_argument("vcf", help="Input VCF with AIM variants")
+    p_aims.set_defaults(func=_cmd_aims)
 
     args = parser.parse_args()
     args.func(args)

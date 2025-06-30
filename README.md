@@ -45,3 +45,16 @@ wasptk plotcov --depth per-base.bed.gz --loci loci.bed --out prefix
 ```
 
 This writes two images: `prefix_bedgraph.png` and `prefix_covgraph.png`.
+
+### Inferring ancestry
+
+The toolkit can infer sample ancestry from a VCF containing 96 ancestry
+informative markers. The command expects the `structure` program to be
+available in the environment.
+
+```bash
+wasptk aims sample.vcf > result.json
+```
+
+The output is a JSON document reporting the inferred ancestry, probabilities
+for each ancestry and how many AIMs were present in the input VCF.
