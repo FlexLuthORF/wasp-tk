@@ -34,30 +34,20 @@ def _read_aim_pos(path: Path) -> Tuple[List[str], List[str]]:
 
 
 def _read_vcf(vcf_file: str) -> Tuple[str, Dict[str, str]]:
-    """Read a simple VCF (optionally gzipped) and return sample name and genotypes."""
-    sample = ""
+    """Read a VCF/BCF file and return the sample name and genotype map."""
+    bcf = pysam.VariantFile(vcf_file)
+    sample = list(bcf.header.samples)[0]
     gt_map: Dict[str, str] = {}
-    opener = open
-    if vcf_file.endswith(".gz"):
-        import gzip
-
-        opener = gzip.open
-    with opener(vcf_file, "rt") as fh:
-        for line in fh:
-            if line.startswith("##"):
-                continue
-            if line.startswith("#"):
-                fields = line.strip().split("\t")
-                sample = fields[9]
-                continue
-            fields = line.strip().split("\t")
-            chrom = fields[0]
-            if not chrom.startswith("chr"):
-                chrom = f"chr{chrom}"
-            pos = fields[1]
-            key = f"{chrom}_{pos}"
-            gt = fields[9].split(":")[0]
-            gt_map[key] = gt
+    for rec in bcf.fetch():
+        chrom = str(rec.chrom)
+        if not chrom.startswith("chr"):
+            chrom = f"chr{chrom}"
+        key = f"{chrom}_{rec.pos}"
+        gt = rec.samples[0].get("GT")
+        if gt is None:
+            gt_map[key] = "./."
+        else:
+            gt_map[key] = "/".join("." if g is None else str(g) for g in gt)
     return sample, gt_map
 
 
