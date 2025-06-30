@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Dict, Tuple, Set
+from typing import List, Dict, Tuple
 
 import pandas as pd
 import pysam
@@ -13,57 +13,49 @@ from .ighc_match import extract_exon_sequences, count_matching_reads as count_ig
 _CONSTANT_GENES = ["IGKC", "IGLC", "TRAC", "TRBC", "TRDC", "TRGC", "IGHC"]
 
 
-def _mismatch_positions(read: pysam.AlignedSegment) -> Set[int]:
-    """Return reference positions with mismatches using the MD tag."""
-    try:
-        md = read.get_tag("MD")
-    except KeyError:
-        return set()
-    pos = read.reference_start
-    mismatches: Set[int] = set()
-    i = 0
-    while i < len(md):
-        if md[i].isdigit():
-            j = i
-            while j < len(md) and md[j].isdigit():
-                j += 1
-            pos += int(md[i:j])
-            i = j
-        elif md[i] == "^":
-            j = i + 1
-            while j < len(md) and md[j].isalpha():
-                j += 1
-            pos += j - i - 1
-            i = j
-        else:
-            # one or more mismatch letters
-            while i < len(md) and md[i].isalpha() and md[i] != "^":
-                mismatches.add(pos)
-                pos += 1
-                i += 1
-    return mismatches
 
 
 def _pileup_region(
     bam: pysam.AlignmentFile, contig: str, start: int, end: int
 ) -> Tuple[List[int], List[int], List[int]]:
-    """Return coverage, mismatch counts and match counts for a region."""
+    """Return coverage, mismatch counts and match counts for a region.
+
+    This replicates the behaviour of ``samtools mpileup`` as closely as
+    possible so that the summary statistics match the historic shell/awk
+    implementation. Coverage is therefore the length of the mpileup
+    ``read_bases`` string and mismatches count everything that is not ``.``
+    or ``,`` in that string.
+    """
+
     length = end - start + 1
     coverage = [0] * length
     mismatches = [0] * length
     matches = [0] * length
-    for read in bam.fetch(contig, start - 1, end):
-        if read.is_unmapped or read.is_secondary or read.is_supplementary:
+
+    for col in bam.pileup(
+        contig,
+        start - 1,
+        end,
+        truncate=True,
+        stepper="all",
+        min_base_quality=0,
+    ):
+        idx = col.reference_pos - (start - 1)
+        if idx < 0 or idx >= length:
             continue
-        mismatch_pos = _mismatch_positions(read)
-        for pos in read.get_reference_positions():
-            if start - 1 <= pos <= end - 1:
-                idx = pos - (start - 1)
-                coverage[idx] += 1
-                if pos in mismatch_pos:
-                    mismatches[idx] += 1
-                else:
-                    matches[idx] += 1
+
+        bases_list = col.get_query_sequences(
+            mark_matches=True, mark_ends=True, add_indels=True
+        )
+        bases = "".join(bases_list)
+        cov = len(bases)
+        mismatch_count = sum(1 for b in bases if b not in [".", ","])
+        match_count = cov - mismatch_count
+
+        coverage[idx] = cov
+        mismatches[idx] = mismatch_count
+        matches[idx] = match_count
+
     return coverage, mismatches, matches
 
 
