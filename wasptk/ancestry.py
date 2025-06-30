@@ -65,9 +65,13 @@ def _convert_to_structure(
     all_gt: List[str] = []
     high_cov: List[str] = []
     for pos in aim_pos:
-        dp = dp_map.get(pos, 0)
-        if dp >= 10 and pos in gt_map:
-            gt = gt_map[pos]
+        dp = dp_map.get(pos)
+        if pos in gt_map:
+            dp_val = dp if dp is not None else 0
+            if dp_val >= 10 or dp is None:
+                gt = gt_map[pos]
+            else:
+                gt = "-9/-9"
         else:
             gt = "-9/-9"
         if gt != "-9/-9":
