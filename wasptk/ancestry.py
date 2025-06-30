@@ -48,7 +48,7 @@ def _read_vcf(vcf_file: str) -> Tuple[str, Dict[str, str], Dict[str, int]]:
         dp = rec.samples[0].get("DP")
         if gt is not None:
             gt_map[key] = "/".join("." if g is None else str(g) for g in gt)
-        dp_map[key] = int(dp) if dp is not None else 0
+        dp_map[key] = int(dp) if dp is not None else None
     return sample, gt_map, dp_map
 
 
