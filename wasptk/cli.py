@@ -9,6 +9,7 @@ def _cmd_readsupport(args: argparse.Namespace) -> None:
         args.allele_table,
         args.bam,
         args.output,
+        reference=args.reference,
         contig_col=args.contig_col,
         start_col=args.start_col,
         end_col=args.end_col,
@@ -38,6 +39,7 @@ def main() -> None:
     p_read.add_argument("allele_table", help="Path to allele_annotation.csv")
     p_read.add_argument("bam", help="Mapped reads BAM")
     p_read.add_argument("output", help="Output CSV")
+    p_read.add_argument("--reference", help="Reference FASTA for samtools mpileup")
     p_read.add_argument("--contig-col", default="contig", help="Column for contig name")
     p_read.add_argument("--start-col", default="start", help="Column for start position")
     p_read.add_argument("--end-col", default="end", help="Column for end position")
