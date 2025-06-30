@@ -1,5 +1,7 @@
 import argparse
+import json
 from .read_support import compute_read_support
+from .ancestry import run_aims
 
 
 def _cmd_readsupport(args: argparse.Namespace) -> None:
@@ -17,6 +19,15 @@ def _cmd_readsupport(args: argparse.Namespace) -> None:
 def _cmd_plotcov(args: argparse.Namespace) -> None:
     from .plotcov import plotcov
     plotcov(args.depth, args.loci, args.out)
+
+
+def _cmd_aims(args: argparse.Namespace) -> None:
+    res = run_aims(args.vcf, sample_id=args.sample, bam=args.bam)
+    if args.output:
+        with open(args.output, "w") as fh:
+            json.dump(res, fh, indent=2)
+    else:
+        print(json.dumps(res, indent=2))
 
 
 def main() -> None:
@@ -46,6 +57,21 @@ def main() -> None:
         help="output images prefix (e.g. PNG)",
     )
     p_plot.set_defaults(func=_cmd_plotcov)
+
+    p_aims = sub.add_parser("aims", help="Infer ancestry using AIMs")
+    p_aims.add_argument("vcf", help="Input VCF with AIM variants")
+    p_aims.add_argument("--bam", help="BAM file for coverage calculation")
+    p_aims.add_argument(
+        "-s",
+        "--sample",
+        help="Sample identifier to include in the output",
+    )
+    p_aims.add_argument(
+        "-o",
+        "--output",
+        help="Write JSON result to file instead of stdout",
+    )
+    p_aims.set_defaults(func=_cmd_aims)
 
     args = parser.parse_args()
     args.func(args)
