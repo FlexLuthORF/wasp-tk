@@ -59,8 +59,17 @@ def main() -> None:
     p_plot.set_defaults(func=_cmd_plotcov)
 
     p_aims = sub.add_parser("aims", help="Infer ancestry using AIMs")
-    p_aims.add_argument("vcf", help="Input VCF with AIM variants")
-    p_aims.add_argument("--bam", help="BAM file for coverage calculation")
+    p_aims.add_argument(
+        "-v",
+        "--vcf",
+        required=True,
+        help="Input VCF with AIM variants",
+    )
+    p_aims.add_argument(
+        "-b",
+        "--bam",
+        help="BAM file for coverage calculation",
+    )
     p_aims.add_argument(
         "-s",
         "--sample",
