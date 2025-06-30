@@ -9,13 +9,24 @@ def reverse_complement(seq: str) -> str:
     return "".join(_complement.get(b, "N") for b in seq[::-1])
 
 
-def extract_sequence(row: pd.Series, seq_col: Optional[str]) -> str:
-    """Return the sequence from ``seq_col`` respecting strand information.
+def extract_sequence(
+    row: pd.Series,
+    gene: str,
+    vseq_col: Optional[str] = None,
+    dseq_col: Optional[str] = None,
+    jseq_col: Optional[str] = None,
+    cseq_col: Optional[str] = None,
+) -> str:
+    """Return a sequence for ``gene`` from ``row`` respecting strand.
 
-    ``seq_col`` may be ``None`` to disable extraction.
+    The fourth character of ``gene`` is used to pick a column from the provided
+    names. Missing columns or values result in an empty string.
     """
 
-    if seq_col is None:
+    type_map = {"V": vseq_col, "D": dseq_col, "J": jseq_col, "C": cseq_col}
+    gene_type = gene[3].upper() if len(gene) >= 4 else ""
+    seq_col = type_map.get(gene_type)
+    if not seq_col:
         return ""
 
     if pd.isna(row.get("sense")):

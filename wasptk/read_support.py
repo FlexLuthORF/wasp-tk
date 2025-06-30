@@ -1,8 +1,8 @@
 """Compute read support metrics from a mapped BAM.
 
 ``compute_read_support`` reads an annotation table and calculates coverage and
-per-read sequence matching statistics. The sequence used for matching can be
-specified explicitly via a column name.
+per-read sequence matching statistics. Sequence columns can be specified
+separately for V, D, J and C genes.
 """
 
 from __future__ import annotations
@@ -170,7 +170,10 @@ def compute_read_support(
     start_col: str = "start",
     end_col: str = "end",
     gene_col: str = "gene",
-    seq_col: Optional[str] = None,
+    vseq_col: str = "V-REGION",
+    dseq_col: str = "D-REGION",
+    jseq_col: str = "J-REGION",
+    cseq_col: str = "C-REGION",
 ) -> None:
     """Calculate read support metrics for regions in ``allele_table``.
 
@@ -186,9 +189,10 @@ def compute_read_support(
         Reference FASTA passed to ``samtools mpileup``.
     contig_col, start_col, end_col, gene_col : str
         Column names describing the region coordinates and gene.
-    seq_col : str, optional
-        Column containing the sequence to use when counting matching reads. If
-        ``None``, per-read matching is skipped.
+    vseq_col, dseq_col, jseq_col, cseq_col : str
+        Column names containing the sequences for V, D, J and C genes
+        respectively. These are looked up based on the fourth character of the
+        gene name.
     """
 
     df = pd.read_csv(allele_table)
@@ -285,7 +289,14 @@ def compute_read_support(
                 pct_acc,
                 pos_10x,
             ) = _calc_simple(cov, mism, match)
-            seq = extract_sequence(row, seq_col)
+            seq = extract_sequence(
+                row,
+                gene,
+                vseq_col=vseq_col,
+                dseq_col=dseq_col,
+                jseq_col=jseq_col,
+                cseq_col=cseq_col,
+            )
             full_span, perfect = count_match_sub(bam, contig, start, end, seq)
             row_metrics = {
                 "Total_Positions": tpos,

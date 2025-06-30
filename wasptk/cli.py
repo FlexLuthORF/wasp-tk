@@ -13,7 +13,10 @@ def _cmd_readsupport(args: argparse.Namespace) -> None:
         start_col=args.start_col,
         end_col=args.end_col,
         gene_col=args.gene_col,
-        seq_col=args.seq_col,
+        vseq_col=args.vseq_col,
+        dseq_col=args.dseq_col,
+        jseq_col=args.jseq_col,
+        cseq_col=args.cseq_col,
         reference=args.reference,
     )
 
@@ -51,9 +54,28 @@ def main() -> None:
     p_read.add_argument("--end-col", default="end", help="Column for end position")
     p_read.add_argument("--gene-col", default="gene", help="Column for gene name")
     p_read.add_argument(
-        "-s",
-        "--seq-col",
-        help="Column containing the sequence for read matching",
+        "-v",
+        "--vseq-col",
+        default="V-REGION",
+        help="Column containing V gene sequences",
+    )
+    p_read.add_argument(
+        "-d",
+        "--dseq-col",
+        default="D-REGION",
+        help="Column containing D gene sequences",
+    )
+    p_read.add_argument(
+        "-j",
+        "--jseq-col",
+        default="J-REGION",
+        help="Column containing J gene sequences",
+    )
+    p_read.add_argument(
+        "-c",
+        "--cseq-col",
+        default="C-REGION",
+        help="Column containing C gene sequences",
     )
     p_read.set_defaults(func=_cmd_readsupport)
 
