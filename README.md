@@ -53,8 +53,9 @@ informative markers. The command expects the `structure` program to be
 available in the environment.
 
 ```bash
-wasptk aims sample.vcf > result.json
+wasptk aims sample.vcf -o result.json
 ```
 
 The output is a JSON document reporting the inferred ancestry, probabilities
-for each ancestry and how many AIMs were present in the input VCF.
+for each ancestry and how many AIMs were present in the input VCF. Use the
+`-o/--output` option to write this JSON to a file.

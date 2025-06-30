@@ -39,7 +39,10 @@ def _read_vcf(vcf_file: str) -> Tuple[str, Dict[str, str], Dict[str, int]]:
     gt_map: Dict[str, str] = {}
     dp_map: Dict[str, int] = {}
     for rec in bcf.fetch():
-        key = f"{rec.chrom}_{rec.pos}"
+        chrom = rec.chrom
+        if not chrom.startswith("chr"):
+            chrom = f"chr{chrom}"
+        key = f"{chrom}_{rec.pos}"
         gt = rec.samples[0].get("GT")
         if gt is None:
             continue
@@ -65,13 +68,11 @@ def _convert_to_structure(
     all_gt: List[str] = []
     high_cov: List[str] = []
     for pos in aim_pos:
-        dp = dp_map.get(pos, 0)
-        if dp >= 10 and pos in gt_map:
+        if pos in gt_map:
             gt = gt_map[pos]
+            high_cov.append(pos)
         else:
             gt = "-9/-9"
-        if gt != "-9/-9":
-            high_cov.append(pos)
         all_gt.append(gt)
     hap1: List[str] = []
     hap2: List[str] = []
@@ -110,6 +111,8 @@ def _run_structure(work_dir: Path) -> None:
         ],
         cwd=work_dir,
         check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
 
 
