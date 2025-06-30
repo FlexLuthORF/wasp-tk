@@ -26,7 +26,7 @@ def _pileup_region(
     contig: str,
     start: int,
     end: int,
-    reference: Optional[str] = None,
+    reference: str,
 ) -> Tuple[List[int], List[int], List[int]]:
     """Return coverage, mismatch counts and match counts for a region using
     ``samtools mpileup``.
@@ -40,9 +40,7 @@ def _pileup_region(
     mismatches = [0] * length
     matches = [0] * length
 
-    cmd = ["samtools", "mpileup"]
-    if reference:
-        cmd += ["-f", reference]
+    cmd = ["samtools", "mpileup", "-f", reference]
     cmd += ["-r", f"{contig}:{start}-{end}", bam_path]
 
     res = subprocess.run(cmd, capture_output=True, text=True)
@@ -167,12 +165,12 @@ def compute_read_support(
     allele_table: str,
     bam_path: str,
     output: str,
+    reference: str,
     contig_col: str = "contig",
     start_col: str = "start",
     end_col: str = "end",
     gene_col: str = "gene",
     seq_col: Optional[str] = None,
-    reference: Optional[str] = None,
 ) -> None:
     """Calculate read support metrics for regions in ``allele_table``.
 
@@ -184,13 +182,13 @@ def compute_read_support(
         Alignment file in BAM format.
     output : str
         Destination for the resulting CSV with appended metrics.
+    reference : str
+        Reference FASTA passed to ``samtools mpileup``.
     contig_col, start_col, end_col, gene_col : str
         Column names describing the region coordinates and gene.
     seq_col : str, optional
         Column containing the sequence to use when counting matching reads. If
         ``None``, per-read matching is skipped.
-    reference : str, optional
-        Reference FASTA passed to ``samtools mpileup``.
     """
 
     df = pd.read_csv(allele_table)

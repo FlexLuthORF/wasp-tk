@@ -11,9 +11,10 @@ pip install -e .
 ## Usage
 
 ```bash
-wasptk readsupport <allele_annotation.csv> <mapped.bam> <output.csv>
+wasptk readsupport -f reference.fa <allele_annotation.csv> <mapped.bam> <output.csv>
 ```
 
+The command requires a reference FASTA supplied with `-f/--reference`.
 Optional flags allow overriding column names in the annotation table using
 `--contig-col` (default: `contig`), `--start-col` (default: `start`),
 `--end-col` (default: `end`), and `--gene-col` (default: `gene`).

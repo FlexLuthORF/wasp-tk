@@ -40,7 +40,12 @@ def main() -> None:
     p_read.add_argument("allele_table", help="Path to allele_annotation.csv")
     p_read.add_argument("bam", help="Mapped reads BAM")
     p_read.add_argument("output", help="Output CSV")
-    p_read.add_argument("-f", "--reference", help="Reference FASTA for mpileup")
+    p_read.add_argument(
+        "-f",
+        "--reference",
+        required=True,
+        help="Reference FASTA for mpileup",
+    )
     p_read.add_argument("--contig-col", default="contig", help="Column for contig name")
     p_read.add_argument("--start-col", default="start", help="Column for start position")
     p_read.add_argument("--end-col", default="end", help="Column for end position")
