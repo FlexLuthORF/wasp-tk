@@ -33,26 +33,27 @@ def _read_aim_pos(path: Path) -> Tuple[List[str], List[str]]:
     return all_aim_pos, aim_pos
 
 
-def _read_vcf(vcf_file: str) -> Tuple[str, Dict[str, str], Dict[str, int]]:
-    bcf = pysam.VariantFile(vcf_file)
-    sample = list(bcf.header.samples)[0]
+def _read_vcf(vcf_file: str) -> Tuple[str, Dict[str, str]]:
+    """Read a simple VCF file and return the sample name and genotype map."""
+    sample = ""
     gt_map: Dict[str, str] = {}
-    dp_map: Dict[str, int] = {}
-    for rec in bcf.fetch():
-        chrom = rec.chrom
-        if not chrom.startswith("chr"):
-            chrom = f"chr{chrom}"
-        key = f"{chrom}_{rec.pos}"
-        gt = rec.samples[0].get("GT")
-        if gt is None:
-            continue
-        gt_str = "/".join("." if g is None else str(g) for g in gt)
-        dp = rec.samples[0].get("DP")
-        if dp is None:
-            dp = 0
-        gt_map[key] = gt_str
-        dp_map[key] = int(dp)
-    return sample, gt_map, dp_map
+    with open(vcf_file) as fh:
+        for line in fh:
+            if line.startswith("##"):
+                continue
+            if line.startswith("#"):
+                fields = line.strip().split("\t")
+                sample = fields[9]
+                continue
+            fields = line.strip().split("\t")
+            chrom = fields[0]
+            if not chrom.startswith("chr"):
+                chrom = f"chr{chrom}"
+            pos = fields[1]
+            key = f"{chrom}_{pos}"
+            gt = fields[9].split(":")[0]
+            gt_map[key] = gt
+    return sample, gt_map
 
 
 def _add_sample_code(ref_sample_no: int, sample_name: str) -> Dict[str, int]:
@@ -62,17 +63,14 @@ def _add_sample_code(ref_sample_no: int, sample_name: str) -> Dict[str, int]:
 def _convert_to_structure(
     aim_pos: List[str],
     gt_map: Dict[str, str],
-    dp_map: Dict[str, int],
     sample_code: Dict[str, int],
 ) -> Tuple[List[str], List[str], List[str]]:
     all_gt: List[str] = []
     high_cov: List[str] = []
     for pos in aim_pos:
-        if pos in gt_map:
-            gt = gt_map[pos]
+        gt = gt_map.get(pos, "-9/-9")
+        if gt not in {"-9/-9", "./."}:
             high_cov.append(pos)
-        else:
-            gt = "-9/-9"
         all_gt.append(gt)
     hap1: List[str] = []
     hap2: List[str] = []
@@ -183,9 +181,9 @@ def _parse_structure_result(
 
 def run_aims(vcf: str) -> Dict[str, object]:
     all_aim_pos, _ = _read_aim_pos(_AIM_POSITIONS)
-    sample_name, gt_map, dp_map = _read_vcf(vcf)
+    sample_name, gt_map = _read_vcf(vcf)
     sample_code = _add_sample_code(2504, sample_name)
-    hap1, hap2, high_cov = _convert_to_structure(all_aim_pos, gt_map, dp_map, sample_code)
+    hap1, hap2, high_cov = _convert_to_structure(all_aim_pos, gt_map, sample_code)
     with tempfile.TemporaryDirectory() as tmp:
         tmpdir = Path(tmp)
         input_file = tmpdir / "1KGP_SuperPop_with_SampleGT.txt"
