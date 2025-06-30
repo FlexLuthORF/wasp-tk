@@ -13,6 +13,7 @@ def _cmd_readsupport(args: argparse.Namespace) -> None:
         start_col=args.start_col,
         end_col=args.end_col,
         gene_col=args.gene_col,
+        seq_col=args.seq_col,
         reference=args.reference,
     )
 
@@ -44,6 +45,11 @@ def main() -> None:
     p_read.add_argument("--start-col", default="start", help="Column for start position")
     p_read.add_argument("--end-col", default="end", help="Column for end position")
     p_read.add_argument("--gene-col", default="gene", help="Column for gene name")
+    p_read.add_argument(
+        "-s",
+        "--seq-col",
+        help="Column containing the sequence for read matching",
+    )
     p_read.set_defaults(func=_cmd_readsupport)
 
     p_plot = sub.add_parser(

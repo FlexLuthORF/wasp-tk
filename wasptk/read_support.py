@@ -1,4 +1,9 @@
-"""Compute read support metrics from a mapped BAM."""
+"""Compute read support metrics from a mapped BAM.
+
+``compute_read_support`` reads an annotation table and calculates coverage and
+per-read sequence matching statistics. The sequence used for matching can be
+specified explicitly via a column name.
+"""
 
 from __future__ import annotations
 
@@ -166,8 +171,28 @@ def compute_read_support(
     start_col: str = "start",
     end_col: str = "end",
     gene_col: str = "gene",
+    seq_col: Optional[str] = None,
     reference: Optional[str] = None,
 ) -> None:
+    """Calculate read support metrics for regions in ``allele_table``.
+
+    Parameters
+    ----------
+    allele_table : str
+        CSV file containing region annotations.
+    bam_path : str
+        Alignment file in BAM format.
+    output : str
+        Destination for the resulting CSV with appended metrics.
+    contig_col, start_col, end_col, gene_col : str
+        Column names describing the region coordinates and gene.
+    seq_col : str, optional
+        Column containing the sequence to use when counting matching reads. If
+        ``None``, per-read matching is skipped.
+    reference : str, optional
+        Reference FASTA passed to ``samtools mpileup``.
+    """
+
     df = pd.read_csv(allele_table)
     bam = pysam.AlignmentFile(bam_path, "rb")
 
@@ -262,7 +287,7 @@ def compute_read_support(
                 pct_acc,
                 pos_10x,
             ) = _calc_simple(cov, mism, match)
-            seq = extract_sequence(row, gene)
+            seq = extract_sequence(row, seq_col)
             full_span, perfect = count_match_sub(bam, contig, start, end, seq)
             row_metrics = {
                 "Total_Positions": tpos,

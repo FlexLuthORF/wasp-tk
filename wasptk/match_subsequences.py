@@ -1,5 +1,5 @@
 """Utilities for per-read sequence matching."""
-from typing import Tuple
+from typing import Tuple, Optional
 import pandas as pd
 import pysam
 
@@ -9,23 +9,21 @@ def reverse_complement(seq: str) -> str:
     return "".join(_complement.get(b, "N") for b in seq[::-1])
 
 
-def extract_sequence(row: pd.Series, gene_key: str) -> str:
+def extract_sequence(row: pd.Series, seq_col: Optional[str]) -> str:
+    """Return the sequence from ``seq_col`` respecting strand information.
+
+    ``seq_col`` may be ``None`` to disable extraction.
+    """
+
+    if seq_col is None:
+        return ""
+
     if pd.isna(row.get("sense")):
         rev = False
     else:
         rev = str(row.get("sense")) == "-"
 
-    seq_col = None
-    if any(x in gene_key for x in ["IGKV", "IGLV", "IGHV", "TRAV", "TRBV", "TRDV", "TRGV"]):
-        seq_col = "V-REGION"
-    elif any(x in gene_key for x in ["IGKJ", "IGLJ", "IGHJ", "TRAJ", "TRBJ", "TRDJ", "TRGJ"]):
-        seq_col = "J-REGION"
-    elif any(x in gene_key for x in ["IGHD", "TRBD", "TRDD"]):
-        seq_col = "D-REGION"
-    elif any(x in gene_key for x in ["IGKC", "IGLC", "TRAC", "TRBC", "TRDC", "TRGC", "IGHC"]):
-        seq_col = "C-REGION"
-
-    if seq_col is None or seq_col not in row or pd.isna(row[seq_col]):
+    if seq_col not in row or pd.isna(row[seq_col]):
         return ""
 
     seq = str(row[seq_col])
