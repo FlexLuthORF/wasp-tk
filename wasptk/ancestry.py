@@ -184,7 +184,8 @@ def _parse_structure_result(
     }
 
 
-def run_aims(vcf: str) -> Dict[str, object]:
+def run_aims(vcf: str, sample_id: str | None = None) -> Dict[str, object]:
+    """Infer sample ancestry from a VCF of 96 AIM variants."""
     all_aim_pos, _ = _read_aim_pos(_AIM_POSITIONS)
     sample_name, gt_map = _read_vcf(vcf)
     sample_code = _add_sample_code(2504, sample_name)
@@ -198,4 +199,9 @@ def run_aims(vcf: str) -> Dict[str, object]:
         except FileNotFoundError as exc:
             raise RuntimeError("structure command not found") from exc
         result_file = tmpdir / "OutfileK5withSuperPop_new_f"
-        return _parse_structure_result(result_file, _POP_CODE, 2505, high_cov)
+        res = _parse_structure_result(result_file, _POP_CODE, 2505, high_cov)
+        if sample_id is not None:
+            res["sample_id"] = sample_id
+        else:
+            res["sample_id"] = sample_name
+        return res

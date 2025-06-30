@@ -22,7 +22,7 @@ def _cmd_plotcov(args: argparse.Namespace) -> None:
 
 
 def _cmd_aims(args: argparse.Namespace) -> None:
-    res = run_aims(args.vcf)
+    res = run_aims(args.vcf, sample_id=args.sample)
     if args.output:
         with open(args.output, "w") as fh:
             json.dump(res, fh, indent=2)
@@ -60,6 +60,11 @@ def main() -> None:
 
     p_aims = sub.add_parser("aims", help="Infer ancestry using AIMs")
     p_aims.add_argument("vcf", help="Input VCF with AIM variants")
+    p_aims.add_argument(
+        "-s",
+        "--sample",
+        help="Sample identifier to include in the output",
+    )
     p_aims.add_argument(
         "-o",
         "--output",
