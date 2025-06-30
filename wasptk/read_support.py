@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 import subprocess
 
 import pandas as pd
@@ -21,6 +21,7 @@ def _pileup_region(
     contig: str,
     start: int,
     end: int,
+    reference: Optional[str] = None,
 ) -> Tuple[List[int], List[int], List[int]]:
     """Return coverage, mismatch counts and match counts for a region using
     ``samtools mpileup``.
@@ -34,7 +35,10 @@ def _pileup_region(
     mismatches = [0] * length
     matches = [0] * length
 
-    cmd = ["samtools", "mpileup", "-r", f"{contig}:{start}-{end}", bam_path]
+    cmd = ["samtools", "mpileup"]
+    if reference:
+        cmd += ["-f", reference]
+    cmd += ["-r", f"{contig}:{start}-{end}", bam_path]
 
     res = subprocess.run(cmd, capture_output=True, text=True)
     if res.returncode != 0:
@@ -162,6 +166,7 @@ def compute_read_support(
     start_col: str = "start",
     end_col: str = "end",
     gene_col: str = "gene",
+    reference: Optional[str] = None,
 ) -> None:
     df = pd.read_csv(allele_table)
     bam = pysam.AlignmentFile(bam_path, "rb")
@@ -181,12 +186,24 @@ def compute_read_support(
             match_all: List[int] = []
             if coords:
                 for s, e in coords:
-                    cov, mism, match = _pileup_region(bam_path, contig, s, e)
+                    cov, mism, match = _pileup_region(
+                        bam_path,
+                        contig,
+                        s,
+                        e,
+                        reference,
+                    )
                     cov_all.extend(cov)
                     mism_all.extend(mism)
                     match_all.extend(match)
             else:
-                cov_all, mism_all, match_all = _pileup_region(bam_path, contig, start, end)
+                cov_all, mism_all, match_all = _pileup_region(
+                    bam_path,
+                    contig,
+                    start,
+                    end,
+                    reference,
+                )
             (
                 tpos,
                 total_reads,
@@ -227,7 +244,13 @@ def compute_read_support(
             for i, count in enumerate(span_counts, start=1):
                 row_metrics[f"Allele_reads_fully_spanning_e{i}"] = count
         else:
-            cov, mism, match = _pileup_region(bam_path, contig, start, end)
+            cov, mism, match = _pileup_region(
+                bam_path,
+                contig,
+                start,
+                end,
+                reference,
+            )
             (
                 tpos,
                 total_reads,
