@@ -2,7 +2,7 @@
 
 ``compute_read_support`` reads an annotation table and calculates coverage and
 per-read sequence matching statistics. Sequence columns can be specified
-separately for V, D, J and C genes.
+separately for V, D, J and C genes. These columns default to ``gene_seq``.
 """
 
 from __future__ import annotations
@@ -170,10 +170,10 @@ def compute_read_support(
     start_col: str = "start",
     end_col: str = "end",
     gene_col: str = "gene",
-    vseq_col: str = "V-REGION",
-    dseq_col: str = "D-REGION",
-    jseq_col: str = "J-REGION",
-    cseq_col: str = "C-REGION",
+    vseq_col: str = "gene_seq",
+    dseq_col: str = "gene_seq",
+    jseq_col: str = "gene_seq",
+    cseq_col: str = "gene_seq",
 ) -> None:
     """Calculate read support metrics for regions in ``allele_table``.
 
@@ -192,7 +192,7 @@ def compute_read_support(
     vseq_col, dseq_col, jseq_col, cseq_col : str
         Column names containing the sequences for V, D, J and C genes
         respectively. These are looked up based on the fourth character of the
-        gene name.
+        gene name. Each defaults to ``gene_seq``.
     """
 
     df = pd.read_csv(allele_table)

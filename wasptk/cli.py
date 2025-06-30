@@ -56,25 +56,25 @@ def main() -> None:
     p_read.add_argument(
         "-v",
         "--vseq-col",
-        default="V-REGION",
+        default="gene_seq",
         help="Column containing V gene sequences",
     )
     p_read.add_argument(
         "-d",
         "--dseq-col",
-        default="D-REGION",
+        default="gene_seq",
         help="Column containing D gene sequences",
     )
     p_read.add_argument(
         "-j",
         "--jseq-col",
-        default="J-REGION",
+        default="gene_seq",
         help="Column containing J gene sequences",
     )
     p_read.add_argument(
         "-c",
         "--cseq-col",
-        default="C-REGION",
+        default="gene_seq",
         help="Column containing C gene sequences",
     )
     p_read.set_defaults(func=_cmd_readsupport)

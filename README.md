@@ -20,6 +20,7 @@ Optional flags allow overriding column names in the annotation table using
 `--end-col` (default: `end`), and `--gene-col` (default: `gene`).
 Use `-v/--vseq-col`, `-d/--dseq-col`, `-j/--jseq-col` and `-c/--cseq-col` to
 specify the columns containing sequences for V, D, J and C genes respectively.
+All default to `gene_seq`.
 
 ### Output columns
 
