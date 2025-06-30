@@ -1,4 +1,9 @@
-"""Compute read support metrics from a mapped BAM."""
+"""Compute read support metrics from a mapped BAM.
+
+``compute_read_support`` reads an annotation table and calculates coverage and
+per-read sequence matching statistics. Sequence columns can be specified
+separately for V, D, J and C genes. These columns default to ``gene_seq``.
+"""
 
 from __future__ import annotations
 
@@ -21,7 +26,7 @@ def _pileup_region(
     contig: str,
     start: int,
     end: int,
-    reference: Optional[str] = None,
+    reference: str,
 ) -> Tuple[List[int], List[int], List[int]]:
     """Return coverage, mismatch counts and match counts for a region using
     ``samtools mpileup``.
@@ -35,9 +40,7 @@ def _pileup_region(
     mismatches = [0] * length
     matches = [0] * length
 
-    cmd = ["samtools", "mpileup"]
-    if reference:
-        cmd += ["-f", reference]
+    cmd = ["samtools", "mpileup", "-f", reference]
     cmd += ["-r", f"{contig}:{start}-{end}", bam_path]
 
     res = subprocess.run(cmd, capture_output=True, text=True)
@@ -162,12 +165,36 @@ def compute_read_support(
     allele_table: str,
     bam_path: str,
     output: str,
+    reference: str,
     contig_col: str = "contig",
     start_col: str = "start",
     end_col: str = "end",
     gene_col: str = "gene",
-    reference: Optional[str] = None,
+    vseq_col: str = "gene_seq",
+    dseq_col: str = "gene_seq",
+    jseq_col: str = "gene_seq",
+    cseq_col: str = "gene_seq",
 ) -> None:
+    """Calculate read support metrics for regions in ``allele_table``.
+
+    Parameters
+    ----------
+    allele_table : str
+        CSV file containing region annotations.
+    bam_path : str
+        Alignment file in BAM format.
+    output : str
+        Destination for the resulting CSV with appended metrics.
+    reference : str
+        Reference FASTA passed to ``samtools mpileup``.
+    contig_col, start_col, end_col, gene_col : str
+        Column names describing the region coordinates and gene.
+    vseq_col, dseq_col, jseq_col, cseq_col : str
+        Column names containing the sequences for V, D, J and C genes
+        respectively. These are looked up based on the fourth character of the
+        gene name. Each defaults to ``gene_seq``.
+    """
+
     df = pd.read_csv(allele_table)
     bam = pysam.AlignmentFile(bam_path, "rb")
 
@@ -262,7 +289,14 @@ def compute_read_support(
                 pct_acc,
                 pos_10x,
             ) = _calc_simple(cov, mism, match)
-            seq = extract_sequence(row, gene)
+            seq = extract_sequence(
+                row,
+                gene,
+                vseq_col=vseq_col,
+                dseq_col=dseq_col,
+                jseq_col=jseq_col,
+                cseq_col=cseq_col,
+            )
             full_span, perfect = count_match_sub(bam, contig, start, end, seq)
             row_metrics = {
                 "Total_Positions": tpos,

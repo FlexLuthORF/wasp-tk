@@ -1,5 +1,5 @@
 """Utilities for per-read sequence matching."""
-from typing import Tuple
+from typing import Tuple, Optional
 import pandas as pd
 import pysam
 
@@ -9,23 +9,32 @@ def reverse_complement(seq: str) -> str:
     return "".join(_complement.get(b, "N") for b in seq[::-1])
 
 
-def extract_sequence(row: pd.Series, gene_key: str) -> str:
+def extract_sequence(
+    row: pd.Series,
+    gene: str,
+    vseq_col: Optional[str] = None,
+    dseq_col: Optional[str] = None,
+    jseq_col: Optional[str] = None,
+    cseq_col: Optional[str] = None,
+) -> str:
+    """Return a sequence for ``gene`` from ``row`` respecting strand.
+
+    The fourth character of ``gene`` is used to pick a column from the provided
+    names. Missing columns or values result in an empty string.
+    """
+
+    type_map = {"V": vseq_col, "D": dseq_col, "J": jseq_col, "C": cseq_col}
+    gene_type = gene[3].upper() if len(gene) >= 4 else ""
+    seq_col = type_map.get(gene_type)
+    if not seq_col:
+        return ""
+
     if pd.isna(row.get("sense")):
         rev = False
     else:
         rev = str(row.get("sense")) == "-"
 
-    seq_col = None
-    if any(x in gene_key for x in ["IGKV", "IGLV", "IGHV", "TRAV", "TRBV", "TRDV", "TRGV"]):
-        seq_col = "V-REGION"
-    elif any(x in gene_key for x in ["IGKJ", "IGLJ", "IGHJ", "TRAJ", "TRBJ", "TRDJ", "TRGJ"]):
-        seq_col = "J-REGION"
-    elif any(x in gene_key for x in ["IGHD", "TRBD", "TRDD"]):
-        seq_col = "D-REGION"
-    elif any(x in gene_key for x in ["IGKC", "IGLC", "TRAC", "TRBC", "TRDC", "TRGC", "IGHC"]):
-        seq_col = "C-REGION"
-
-    if seq_col is None or seq_col not in row or pd.isna(row[seq_col]):
+    if seq_col not in row or pd.isna(row[seq_col]):
         return ""
 
     seq = str(row[seq_col])

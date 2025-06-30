@@ -11,11 +11,16 @@ pip install -e .
 ## Usage
 
 ```bash
-wasptk readsupport <allele_annotation.csv> <mapped.bam> <output.csv>
+wasptk readsupport -f reference.fa <allele_annotation.csv> <mapped.bam> <output.csv>
 ```
 
-Optional flags allow overriding the column names in the annotation table using
-`--contig-col`(default:'contig'), `--start-col`(default:'start'), `--end-col`(default:'end'), and `--gene-col`(default:'gene').
+The command requires a reference FASTA supplied with `-f/--reference`.
+Optional flags allow overriding column names in the annotation table using
+`--contig-col` (default: `contig`), `--start-col` (default: `start`),
+`--end-col` (default: `end`), and `--gene-col` (default: `gene`).
+Use `-v/--vseq-col`, `-d/--dseq-col`, `-j/--jseq-col` and `-c/--cseq-col` to
+specify the columns containing sequences for V, D, J and C genes respectively.
+All default to `gene_seq`.
 
 ### Output columns
 
