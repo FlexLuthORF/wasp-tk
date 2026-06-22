@@ -1,0 +1,2 @@
+[console_scripts]
+wasptk = wasptk.cli:main
